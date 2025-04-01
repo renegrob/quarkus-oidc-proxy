@@ -1,0 +1,50 @@
+quarkus:
+  http:
+    port: 8080
+    cors:
+      ~: true
+      methods: GET,POST,PUT,DELETE
+      headers: Content-Type,Authorization
+      exposed-headers: Content-Disposition
+      access-control-max-age: 24H
+      access-control-allow-credentials: true
+
+  oidc:
+    # This will be defined depending on which provider is used
+    # The placeholders will be replaced with actual values in the configuration
+    auth-server-url: ${OIDC_AUTH_SERVER_URL:https://example.com/oauth2}
+    client-id: ${OIDC_CLIENT_ID:client-id}
+    credentials:
+      secret: ${OIDC_CLIENT_SECRET:client-secret}
+    token:
+      issuer: ${OIDC_ISSUER:https://example.com}
+    authentication:
+      redirect-path: /auth/callback
+      restore-path-after-redirect: true
+      cookie-path: /
+    logout:
+      path: /auth/logout
+      post-logout-path: /
+
+  log:
+    level: INFO
+    category:
+      "io.quarkus.oidc":
+        level: DEBUG
+      "com.example.oauth2proxy":
+        level: DEBUG
+
+oauth2proxy:
+  cookie:
+    name: ${COOKIE_NAME:AUTH_TOKEN}
+    path: ${COOKIE_PATH:/}
+    domain: ${COOKIE_DOMAIN:}
+    secure: ${COOKIE_SECURE:true}
+    http-only: ${COOKIE_HTTP_ONLY:true}
+    same-site: ${COOKIE_SAME_SITE:Lax}
+    max-age: ${COOKIE_MAX_AGE:86400}
+  jwt:
+    issuer-key: ${JWT_ISSUER_KEY:iss}
+    subject-key: ${JWT_SUBJECT_KEY:sub}
+    expiration-key: ${JWT_EXPIRATION_KEY:exp}
+    header-name: ${JWT_HEADER_NAME:X-Auth-Token}

@@ -1,0 +1,35 @@
+= Quarkus OAuth2/OIDC Proxy for NGINX
+:toc: left
+:icons: font
+:source-highlighter: highlight.js
+
+This Quarkus application handles OAuth2/OpenID Connect authentication for NGINX using the stateless cookie approach.
+
+== Key Components
+
+=== Build Configuration
+The `build.gradle.kts` file sets up the project with Quarkus dependencies for OIDC, RESTEasy Reactive, JWT, and YAML configuration.
+
+=== Configuration Mapping
+The `OAuthConfig` class uses `@ConfigMapping` to bind YAML configuration properties to Java interfaces, making configuration type-safe and flexible.
+
+=== Key Services
+
+* *CookieService*: Manages creation and validation of authentication cookies
+* *JwtService*: Handles JWT token validation and claim extraction
+
+=== REST Endpoints
+
+* */auth/login*: Triggers the OIDC authentication flow
+* */auth/callback*: Handles the return from the IDP, creates the authentication cookie
+* */auth/validate*: Validates the token from the cookie (used by NGINX for auth_request)
+* */auth/logout*: Clears the authentication cookie
+
+=== NGINX Integration
+The included NGINX configuration uses the `auth_request` directive to validate requests against the `/auth/validate` endpoint and passes the JWT token to backend services.
+
+== Provider Compatibility
+
+The application works with any OAuth2/OpenID Connect provider by setting the appropriate configuration in `application.yaml`. The design is completely stateless, storing all authentication information in cookies without using server-side sessions.
+
+To configure for a specific provider (like Google, EntraID, etc.), you only need to update the OIDC configuration variables in the YAML file or set the corresponding environment variables.
