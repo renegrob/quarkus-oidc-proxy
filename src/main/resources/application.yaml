@@ -9,42 +9,63 @@ quarkus:
       access-control-max-age: 24H
       access-control-allow-credentials: true
 
-  oidc:
-    # This will be defined depending on which provider is used
-    # The placeholders will be replaced with actual values in the configuration
-    auth-server-url: ${OIDC_AUTH_SERVER_URL:https://example.com/oauth2}
-    client-id: ${OIDC_CLIENT_ID:client-id}
-    credentials:
-      secret: ${OIDC_CLIENT_SECRET:client-secret}
-    token:
-      issuer: ${OIDC_ISSUER:https://example.com}
-    authentication:
-      redirect-path: /auth/callback
-      restore-path-after-redirect: true
-      cookie-path: /
-    logout:
-      path: /auth/logout
-      post-logout-path: /
-
+#  oidc:
+#    authentication:
+#      redirect-path: /auth/callback
+#      restore-path-after-redirect: false
+#    logout:
+#      post-logout-path: /
   log:
     level: INFO
     category:
-      "io.quarkus.oidc":
-        level: DEBUG
-      "com.example.oauth2proxy":
+      "io.github.renegrob.oidc":
         level: DEBUG
 
-oauth2proxy:
+oidc:
+  state-secret: ${STATE_SECRET}
   cookie:
     name: ${COOKIE_NAME:AUTH_TOKEN}
     path: ${COOKIE_PATH:/}
-    domain: ${COOKIE_DOMAIN:}
+    domain: ${COOKIE_DOMAIN}
     secure: ${COOKIE_SECURE:true}
     http-only: ${COOKIE_HTTP_ONLY:true}
     same-site: ${COOKIE_SAME_SITE:Lax}
-    max-age: ${COOKIE_MAX_AGE:86400}
-  jwt:
-    issuer-key: ${JWT_ISSUER_KEY:iss}
-    subject-key: ${JWT_SUBJECT_KEY:sub}
-    expiration-key: ${JWT_EXPIRATION_KEY:exp}
-    header-name: ${JWT_HEADER_NAME:X-Auth-Token}
+    max-age: ${COOKIE_MAX_AGE:24h}
+  federation-mode: ${OIDC_FEDERATION_MODE:FEDERATE_FROM_ID_TOKEN}
+  federated-idp:
+    discovery-enabled: ${OIDC_DISCOVERY_ENABLED:true}
+    discovery-path: ${OIDC_DISCOVERY_PATH:.well-known/openid-configuration}
+    # The following properties are only used if discovery is disabled
+    auth-server-url: ${OIDC_AUTH_SERVER_URL:}
+    token-path: ${OIDC_TOKEN_PATH:}
+    authorization-path: ${OIDC_AUTHORIZATION_PATH:}
+    jwks-path: ${OIDC_JWKS_PATH:}
+    userinfo-path: ${OIDC_USERINFO_PATH:}
+    end-session-path: ${OIDC_END_SESSION_PATH:}
+    issuer: ${OIDC_ISSUER:}
+    audience: ${OIDC_AUDIENCE:}
+    client:
+      client-id: ${OIDC_CLIENT_ID}
+      client-secret: ${OIDC_CLIENT_SECRET}
+      scope: ${OIDC_SCOPE:openid profile email}
+      redirect-uri: ${OIDC_REDIRECT_URL}
+  internal-issuer:
+    issuer: ${OIDC_INTERNAL_ISSUER:}
+    pass-through-claims: ${OIDC_PASS_THROUGH_CLAIMS:roles,email,given_name,family_name,name}
+    claim-mappings:
+      - claim: roles
+        value-mappings:
+         - from: bcecbcf7-e7f1-4896-a006-e120ebeb2b7c
+           to: MyBackend-Group1
+         - from: e3ac9c51-3af6-4ab8-8465-a181fe83f592
+           to: MyBackend-Group2
+        remove-non-matching: true
+    key:
+        key-id:
+        signature-algorithm: ES256
+        private-key: ${OIDC_INTERNAL_ISSUER_PRIVATE_KEY}
+        public-key: |
+          -----BEGIN PUBLIC KEY-----
+          MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEdpwDEycOhFEi9A+sz9NN9lTnPPwP
+          PMUCPl2fCC4p4ly4vvF84eLvyunbKImxErpBb/gIi8dGANd3pVSAkuGZgg==
+          -----END PUBLIC KEY-----
