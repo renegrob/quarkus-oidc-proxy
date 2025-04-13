@@ -9,7 +9,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.Response;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,24 +19,19 @@ import java.util.Map;
 
 @ApplicationScoped
 @Unremovable
+@SuppressWarnings("unused")
 public class DiscoveryService {
     private static final Logger LOG = LoggerFactory.getLogger(DiscoveryService.class);
     
     @Inject
     OAuthConfig config;
     
-    @ConfigProperty(name = "quarkus.oidc.auth-server-url")
-    String authServerUrl;
-    
-    @ConfigProperty(name = "quarkus.oidc.discovery-enabled", defaultValue = "true")
-    boolean discoveryEnabled;
-    
     private final ObjectMapper objectMapper = new ObjectMapper();
     private Map<String, String> discoveredEndpoints = new HashMap<>();
     
     @PostConstruct
     void init() {
-        if (discoveryEnabled) {
+        if (config.provider().discoveryEnabled()) {
             discoverEndpoints();
         } else {
             LOG.info("OIDC discovery is disabled, using configured endpoints");
@@ -77,8 +71,14 @@ public class DiscoveryService {
     }
     
     private String buildDiscoveryUrl() throws URISyntaxException {
+
+        if (config.provider().discoveryUrl().isPresent()) {
+            return config.provider().discoveryUrl().get();
+        }
+
         // Strip trailing slash if present
-        String baseUrl = authServerUrl.endsWith("/") 
+        String authServerUrl = authServerUrl();
+        String baseUrl = authServerUrl.endsWith("/")
                 ? authServerUrl.substring(0, authServerUrl.length() - 1) 
                 : authServerUrl;
         
@@ -99,17 +99,22 @@ public class DiscoveryService {
         // If there's already a path, ensure discovery path is correctly appended
         return baseUrl + (path.endsWith("/") ? "" : "/") + config.provider().discoveryPath();
     }
-    
+
+    private String authServerUrl() {
+        return config.provider().authServerUrl().toString();
+    }
+
     private String getStringValue(JsonNode json, String field) {
         JsonNode node = json.get(field);
         return node != null ? node.asText() : null;
     }
     
     public String getEndpoint(String endpointType) {
-        if (discoveryEnabled && discoveredEndpoints.containsKey(endpointType)) {
+        if (config.provider().discoveryEnabled() && discoveredEndpoints.containsKey(endpointType)) {
             return discoveredEndpoints.get(endpointType);
         }
-        
+        var authServerUrl = authServerUrl();
+
         // Fallback to configured values if discovery is disabled or endpoint not found
         switch (endpointType) {
             case "issuer":

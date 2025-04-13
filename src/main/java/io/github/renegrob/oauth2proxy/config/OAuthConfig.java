@@ -5,11 +5,12 @@ import io.smallrye.config.WithDefault;
 import io.smallrye.config.WithName;
 import jakarta.ws.rs.core.NewCookie;
 
+import java.net.URI;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
-@ConfigMapping(prefix = "oauth2proxy")
+@ConfigMapping(prefix = "oauth2-proxy")
 public interface OAuthConfig {
 
     @WithName("cookie")
@@ -31,6 +32,7 @@ public interface OAuthConfig {
         String path();
 
         @WithName("domain")
+        @WithDefault("localhost") // TODO: remove
         String domain();
 
         @WithName("secure")
@@ -81,6 +83,9 @@ public interface OAuthConfig {
     }
 
     interface ProviderConfig {
+        @WithName("discovery-url")
+        Optional<String> discoveryUrl();
+
         @WithName("discovery-enabled")
         @WithDefault("true")
         boolean discoveryEnabled();
@@ -90,7 +95,7 @@ public interface OAuthConfig {
         String discoveryPath();
 
         @WithName("auth-server-url")
-        Optional<String> authServerUrl();
+        URI authServerUrl();
 
         @WithName("token-path")
         Optional<String> tokenPath();

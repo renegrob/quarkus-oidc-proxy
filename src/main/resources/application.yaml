@@ -10,20 +10,27 @@ quarkus:
       access-control-allow-credentials: true
 
   oidc:
+    roles:
+      source: idtoken
+      role-claim-path: roles
+    application-type: web-app
     # The base URL for the provider - will be used for discovery
     auth-server-url: ${OIDC_AUTH_SERVER_URL}
     # Discovery will be enabled by default, provider endpoints will be fetched from well-known endpoint
     discovery-enabled: ${OIDC_DISCOVERY_ENABLED:true}
     client-id: ${OIDC_CLIENT_ID}
+    token-path: ${OIDC_TOKEN_PATH}
+    token:
+        issuer: ${OIDC_ISSUER}
     credentials:
       secret: ${OIDC_CLIENT_SECRET}
     authentication:
       scopes: ${OIDC_SCOPE:openid profile email}
       redirect-path: /auth/callback
-      restore-path-after-redirect: true
+      restore-path-after-redirect: false
       cookie-path: /
     logout:
-      path: /auth/logout
+      # path: /auth/logout
       post-logout-path: /
   log:
     level: INFO
@@ -33,7 +40,7 @@ quarkus:
       "com.example.oauth2proxy":
         level: DEBUG
 
-oauth2proxy:
+oauth2-proxy:
   cookie:
     name: ${COOKIE_NAME:AUTH_TOKEN}
     path: ${COOKIE_PATH:/}
@@ -42,14 +49,14 @@ oauth2proxy:
     http-only: ${COOKIE_HTTP_ONLY:true}
     same-site: ${COOKIE_SAME_SITE:Lax}
     max-age: ${COOKIE_MAX_AGE:24h}
-    jwt:
-      issuer-key: ${JWT_ISSUER_KEY:iss}
-      subject-key: ${JWT_SUBJECT_KEY:sub}
-      expiration-key: ${JWT_EXPIRATION_KEY:exp}
-      header-name: ${JWT_HEADER_NAME:X-Auth-Token}
-      pass-through-claims: ${JWT_PASS_THROUGH_CLAIMS:roles,groups,scp,email,given_name,family_name,name}
-      pass-through-headers: ${JWT_PASS_THROUGH_HEADERS:true}
-      claim-to-header-prefix: ${JWT_CLAIM_TO_HEADER_PREFIX:X-Auth-}
+#    jwt:
+#      issuer-key: ${JWT_ISSUER_KEY:iss}
+#      subject-key: ${JWT_SUBJECT_KEY:sub}
+#      expiration-key: ${JWT_EXPIRATION_KEY:exp}
+#      header-name: ${JWT_HEADER_NAME:X-Auth-Token}
+#      pass-through-claims: ${JWT_PASS_THROUGH_CLAIMS:roles,groups,scp,email,given_name,family_name,name}
+#      pass-through-headers: ${JWT_PASS_THROUGH_HEADERS:true}
+#      claim-to-header-prefix: ${JWT_CLAIM_TO_HEADER_PREFIX:X-Auth-}
   provider:
     discovery-enabled: ${OIDC_DISCOVERY_ENABLED:true}
     discovery-path: ${OIDC_DISCOVERY_PATH:.well-known/openid-configuration}

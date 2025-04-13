@@ -1,0 +1,54 @@
+= Azure EntraID Setup for OAuth2 Proxy
+
+== Step 1: Register a new application
+. Go to the Azure Portal
+. Navigate to "Microsoft Entra ID" > "App registrations"
+. Click "New registration"
+. Enter a name for your application
+. For Redirect URI, set the type to "Web" and enter the callback URL:
+  `https://app.example.com/auth/callback`
+. Click "Register"
+
+== Step 2: Configure authentication
+. In your registered app, go to "Authentication"
+. Verify the redirect URI is set correctly
+. Under "Implicit grant and hybrid flows", check "ID tokens"
+. Click "Save"
+
+== Step 3: Create a client secret
+. Go to "Certificates & secrets"
+. Click "New client secret"
+. Add a description and select an expiration period
+. Copy the generated secret value (you'll only see it once)
+
+== Step 4: Configure API permissions
+. Go to "API permissions"
+. Click "Add a permission"
+. Select "Microsoft Graph"
+. Choose "Delegated permissions"
+. Add necessary permissions like "User.Read" (minimum required)
+. Click "Add permissions"
+. Click "Grant admin consent" if you have administrator rights
+
+== Step 5: Get the required configuration values
+. Application (client) ID: Found on the Overview page
+. Directory (tenant) ID: Found on the Overview page
+. Client Secret: The value you copied in Step 3
+
+
+== Step 6: Go to Enterprise Applications:
+
+. Select Enterprise applications
+. Find and select your application (it will have the same name as your App registration)
+
+== Step 7: Assign Groups:
+
+. In the left menu, click on Users and groups
+. Click the + Add user/group button
+. In the "Add Assignment" panel that opens:
+
+. Click on None selected under "Users and groups"
+. Search for and select the groups you want to assign to the application
+. Click Select at the bottom of the panel
+
+. Click Assign to complete the assignment

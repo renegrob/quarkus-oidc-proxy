@@ -24,6 +24,7 @@ The `OAuthConfig` class uses `@ConfigMapping` to bind YAML configuration propert
 * */auth/callback*: Handles the return from the IDP, creates the authentication cookie
 * */auth/validate*: Validates the token from the cookie (used by NGINX for auth_request)
 * */auth/logout*: Clears the authentication cookie
+* */auth/discovery*: Provides OIDC discovery information for dynamic client registration
 
 === NGINX Integration
 The included NGINX configuration uses the `auth_request` directive to validate requests against the `/auth/validate` endpoint and passes the JWT token to backend services.
