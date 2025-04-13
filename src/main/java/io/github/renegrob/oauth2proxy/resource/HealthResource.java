@@ -1,4 +1,4 @@
-package com.example.oauth2proxy.resource;
+package io.github.renegrob.oauth2proxy.resource;
 
 
 import jakarta.ws.rs.GET;

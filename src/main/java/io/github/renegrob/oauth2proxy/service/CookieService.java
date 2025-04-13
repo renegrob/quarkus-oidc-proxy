@@ -1,6 +1,6 @@
-package com.example.oauth2proxy.service;
+package io.github.renegrob.oauth2proxy.service;
 
-import com.example.oauth2proxy.config.OAuthConfig;
+import io.github.renegrob.oauth2proxy.config.OAuthConfig;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.NewCookie;
@@ -19,7 +19,7 @@ public class CookieService {
                 .value(token)
                 .path(config.cookie().path())
                 .domain(config.cookie().domain())
-                .maxAge(config.cookie().maxAge())
+                .maxAge((int) config.cookie().maxAge().toSeconds())
                 .secure(config.cookie().secure())
                 .httpOnly(config.cookie().httpOnly())
                 .sameSite(config.cookie().sameSite())

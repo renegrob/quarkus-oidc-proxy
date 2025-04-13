@@ -10,22 +10,21 @@ quarkus:
       access-control-allow-credentials: true
 
   oidc:
-    # This will be defined depending on which provider is used
-    # The placeholders will be replaced with actual values in the configuration
-    auth-server-url: ${OIDC_AUTH_SERVER_URL:https://example.com/oauth2}
-    client-id: ${OIDC_CLIENT_ID:client-id}
+    # The base URL for the provider - will be used for discovery
+    auth-server-url: ${OIDC_AUTH_SERVER_URL}
+    # Discovery will be enabled by default, provider endpoints will be fetched from well-known endpoint
+    discovery-enabled: ${OIDC_DISCOVERY_ENABLED:true}
+    client-id: ${OIDC_CLIENT_ID}
     credentials:
-      secret: ${OIDC_CLIENT_SECRET:client-secret}
-    token:
-      issuer: ${OIDC_ISSUER:https://example.com}
+      secret: ${OIDC_CLIENT_SECRET}
     authentication:
+      scopes: ${OIDC_SCOPE:openid profile email}
       redirect-path: /auth/callback
       restore-path-after-redirect: true
       cookie-path: /
     logout:
       path: /auth/logout
       post-logout-path: /
-
   log:
     level: INFO
     category:
@@ -38,13 +37,27 @@ oauth2proxy:
   cookie:
     name: ${COOKIE_NAME:AUTH_TOKEN}
     path: ${COOKIE_PATH:/}
-    domain: ${COOKIE_DOMAIN:}
+    domain: ${COOKIE_DOMAIN}
     secure: ${COOKIE_SECURE:true}
     http-only: ${COOKIE_HTTP_ONLY:true}
     same-site: ${COOKIE_SAME_SITE:Lax}
-    max-age: ${COOKIE_MAX_AGE:86400}
-  jwt:
-    issuer-key: ${JWT_ISSUER_KEY:iss}
-    subject-key: ${JWT_SUBJECT_KEY:sub}
-    expiration-key: ${JWT_EXPIRATION_KEY:exp}
-    header-name: ${JWT_HEADER_NAME:X-Auth-Token}
+    max-age: ${COOKIE_MAX_AGE:24h}
+    jwt:
+      issuer-key: ${JWT_ISSUER_KEY:iss}
+      subject-key: ${JWT_SUBJECT_KEY:sub}
+      expiration-key: ${JWT_EXPIRATION_KEY:exp}
+      header-name: ${JWT_HEADER_NAME:X-Auth-Token}
+      pass-through-claims: ${JWT_PASS_THROUGH_CLAIMS:roles,groups,scp,email,given_name,family_name,name}
+      pass-through-headers: ${JWT_PASS_THROUGH_HEADERS:true}
+      claim-to-header-prefix: ${JWT_CLAIM_TO_HEADER_PREFIX:X-Auth-}
+  provider:
+    discovery-enabled: ${OIDC_DISCOVERY_ENABLED:true}
+    discovery-path: ${OIDC_DISCOVERY_PATH:.well-known/openid-configuration}
+    # The following properties are only used if discovery is disabled
+    auth-server-url: ${OIDC_AUTH_SERVER_URL:}
+    token-path: ${OIDC_TOKEN_PATH:}
+    authorization-path: ${OIDC_AUTHORIZATION_PATH:}
+    jwks-path: ${OIDC_JWKS_PATH:}
+    userinfo-path: ${OIDC_USERINFO_PATH:}
+    end-session-path: ${OIDC_END_SESSION_PATH:}
+    issuer: ${OIDC_ISSUER:}

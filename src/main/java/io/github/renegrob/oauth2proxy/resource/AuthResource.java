@@ -1,12 +1,10 @@
-package com.example.oauth2proxy.resource;
+package io.github.renegrob.oauth2proxy.resource;
 
-import com.example.oauth2proxy.config.OAuthConfig;
-import com.example.oauth2proxy.service.CookieService;
-import io.quarkus.oidc.IdTokenCredential;
+import io.github.renegrob.oauth2proxy.config.OAuthConfig;
+import io.github.renegrob.oauth2proxy.service.CookieService;
 import io.quarkus.oidc.RefreshToken;
 
 import io.quarkus.security.credential.TokenCredential;
-import io.vertx.core.http.Cookie;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
