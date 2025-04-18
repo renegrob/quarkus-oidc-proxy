@@ -19,8 +19,8 @@ public interface OAuthConfig {
     @WithName("jwt")
     JwtConfig jwt();
 
-    @WithName("provider")
-    ProviderConfig provider();
+    @WithName("federated-idp")
+    FederatedProviderConfig provider();
 
     interface CookieConfig {
         @WithName("name")
@@ -82,7 +82,11 @@ public interface OAuthConfig {
         String claimToHeaderPrefix();
     }
 
-    interface ProviderConfig {
+    interface FederatedProviderConfig {
+
+        @WithName("client")
+        FederatedClientConfig client();
+
         @WithName("discovery-url")
         Optional<String> discoveryUrl();
 
@@ -114,5 +118,19 @@ public interface OAuthConfig {
 
         @WithName("issuer")
         Optional<String> issuer();
+    }
+
+    interface FederatedClientConfig {
+        @WithName("client-id")
+        String clientId();
+
+        @WithName("client-secret")
+        String clientSecret();
+
+        @WithName("redirect-uri")
+        URI redirectUri();
+
+        @WithName("scope")
+        Optional<String> scope();
     }
 }

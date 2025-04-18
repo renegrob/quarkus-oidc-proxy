@@ -22,6 +22,9 @@ public class JwtService {
     JWTParser jwtParser;
 
     public boolean validateToken(String token) {
+        if (token == null || token.isEmpty()) {
+            return false;
+        }
         try {
             JsonWebToken jwt = jwtParser.parse(token);
 

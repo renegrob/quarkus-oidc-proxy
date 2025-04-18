@@ -1,22 +1,13 @@
 package io.github.renegrob.oauth2proxy.resource;
 
 import io.github.renegrob.oauth2proxy.config.OAuthConfig;
-import io.github.renegrob.oauth2proxy.service.CookieService;
-import io.github.renegrob.oauth2proxy.service.DiscoveryService;
-import io.github.renegrob.oauth2proxy.service.JwtService;
-import io.quarkus.oidc.IdToken;
-import io.quarkus.oidc.RefreshToken;
-import io.quarkus.security.Authenticated;
-import io.quarkus.security.credential.TokenCredential;
+import io.github.renegrob.oauth2proxy.service.*;
+import io.github.renegrob.oauth2proxy.service.idp.DiscoveryService;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.jboss.resteasy.reactive.RestCookie;
 import org.jboss.resteasy.reactive.RestResponse;
@@ -26,7 +17,9 @@ import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.util.Map;
 
-@Path("/auth")
+import static io.github.renegrob.oauth2proxy.service.idp.EndpointType.*;
+
+@Path("/authOld")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @SuppressWarnings("unused")
@@ -34,7 +27,6 @@ public class AuthResource {
     private static final Logger LOG = LoggerFactory.getLogger(AuthResource.class);
 
     @Inject
-    @IdToken
     JsonWebToken idToken;
 
 //    @Inject
@@ -52,27 +44,6 @@ public class AuthResource {
     @Inject
     DiscoveryService discoveryService;
 
-    @ConfigProperty(name = "quarkus.oidc.authentication.redirect-path")
-    String redirectPath;
-
-    @GET
-    @Path("/callback")
-    public RestResponse<Void> callback() {
-        try {
-            String token = idToken.getRawToken();
-            LOG.debug("Received ID token in callback");
-
-            NewCookie authCookie = cookieService.createAuthCookie(token);
-
-            return RestResponse.ResponseBuilder.<Void>create(Response.Status.FOUND)
-                    .location(URI.create("/"))
-                    .cookie(authCookie)
-                    .build();
-        } catch (Exception e) {
-            LOG.error("Error in callback endpoint", e);
-            return RestResponse.status(Response.Status.INTERNAL_SERVER_ERROR);
-        }
-    }
 
     @GET
     @Path("/validate")
@@ -82,7 +53,7 @@ public class AuthResource {
             return RestResponse.status(Response.Status.UNAUTHORIZED);
         }
 
-        if (cookieService.isValidToken(token)) {
+        if (isValidToken(token)) {
             LOG.debug("Token is valid");
             RestResponse.ResponseBuilder<Void> responseBuilder = RestResponse.ResponseBuilder.<Void>ok()
                     .header(config.jwt().headerName(), token);
@@ -127,6 +98,10 @@ public class AuthResource {
         }
     }
 
+    private boolean isValidToken(String token) {
+        return false;
+    }
+
     @GET
     @Path("/logout")
     public RestResponse<Void> logout() {
@@ -134,7 +109,7 @@ public class AuthResource {
         NewCookie logoutCookie = cookieService.createLogoutCookie();
 
         // Try to get end session endpoint from discovery
-        String endSessionEndpoint = discoveryService.getEndpoint("end_session_endpoint");
+        String endSessionEndpoint = discoveryService.getEndpoint(END_SESSION_ENDPOINT);
         if (endSessionEndpoint != null) {
             LOG.debug("Redirecting to provider end session endpoint: {}", endSessionEndpoint);
             return RestResponse.ResponseBuilder.<Void>create(Response.Status.FOUND)
@@ -150,31 +125,23 @@ public class AuthResource {
         }
     }
 
-    @Authenticated
-    @GET
-    @Path("/login")
-    public RestResponse<Void> login() {
-        LOG.debug("Logged in as {}", idToken.getSubject());
-        // This endpoint will trigger the OIDC authentication flow
-        // The actual redirect is handled by Quarkus OIDC extension
-        return RestResponse.ok();
-    }
 
-    @GET
-    @Path("/discovery")
-    public RestResponse<Map<String, String>> getDiscoveryInfo() {
-        Map<String, String> discoveryInfo = Map.of(
-                "issuer", discoveryService.getEndpoint("issuer") != null ? discoveryService.getEndpoint("issuer") : "Not configured",
-                "authorization_endpoint", discoveryService.getEndpoint("authorization_endpoint") != null ? discoveryService.getEndpoint("authorization_endpoint") : "Not configured",
-                "token_endpoint", discoveryService.getEndpoint("token_endpoint") != null ? discoveryService.getEndpoint("token_endpoint") : "Not configured",
-                "userinfo_endpoint", discoveryService.getEndpoint("userinfo_endpoint") != null ? discoveryService.getEndpoint("userinfo_endpoint") : "Not configured",
-                "jwks_uri", discoveryService.getEndpoint("jwks_uri") != null ? discoveryService.getEndpoint("jwks_uri") : "Not configured",
-                "end_session_endpoint", discoveryService.getEndpoint("end_session_endpoint") != null ? discoveryService.getEndpoint("end_session_endpoint") : "Not configured",
-                "callback_path", redirectPath
-        );
 
-        return RestResponse.ok(discoveryInfo);
-    }
+//    @GET
+//    @Path("/discovery")
+//    public RestResponse<Map<String, String>> getDiscoveryInfo() {
+//        Map<String, String> discoveryInfo = Map.of(
+//                "issuer", discoveryService.getEndpoint(ISSUER) != null ? discoveryService.getEndpoint("issuer") : "Not configured",
+//                "authorization_endpoint", discoveryService.getEndpoint(AUTHORIZATION_ENDPOINT) != null ? discoveryService.getEndpoint("authorization_endpoint") : "Not configured",
+//                "token_endpoint", discoveryService.getEndpoint("token_endpoint") != null ? discoveryService.getEndpoint("token_endpoint") : "Not configured",
+//                "userinfo_endpoint", discoveryService.getEndpoint("userinfo_endpoint") != null ? discoveryService.getEndpoint("userinfo_endpoint") : "Not configured",
+//                "jwks_uri", discoveryService.getEndpoint("jwks_uri") != null ? discoveryService.getEndpoint("jwks_uri") : "Not configured",
+//                "end_session_endpoint", discoveryService.getEndpoint("end_session_endpoint") != null ? discoveryService.getEndpoint("end_session_endpoint") : "Not configured",
+//                "callback_path", redirectPath
+//        );
+//
+//        return RestResponse.ok(discoveryInfo);
+//    }
 
 
 }

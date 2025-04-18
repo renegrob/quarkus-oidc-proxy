@@ -25,6 +25,7 @@ dependencies {
     implementation("org.jboss.slf4j:slf4j-jboss-logmanager")
     implementation("io.quarkus:quarkus-smallrye-jwt")
     implementation("io.quarkus:quarkus-smallrye-jwt-build")
+    implementation("io.quarkus:quarkus-jsonp")
 
     testImplementation("io.quarkus:quarkus-junit5")
     testImplementation("io.rest-assured:rest-assured")

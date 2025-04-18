@@ -1,4 +1,4 @@
-package io.github.renegrob.oauth2proxy.service;
+package io.github.renegrob.oauth2proxy.service.idp;
 
 import io.github.renegrob.oauth2proxy.config.OAuthConfig;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -7,6 +7,7 @@ import io.quarkus.arc.Unremovable;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
@@ -14,8 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @ApplicationScoped
 @Unremovable
@@ -27,7 +28,7 @@ public class DiscoveryService {
     OAuthConfig config;
     
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private Map<String, String> discoveredEndpoints = new HashMap<>();
+    private final Map<EndpointType, String> discoveredEndpoints = new ConcurrentHashMap<>();
     
     @PostConstruct
     void init() {
@@ -39,11 +40,11 @@ public class DiscoveryService {
     }
     
     private void discoverEndpoints() {
-        try {
+        try (Client client = ClientBuilder.newClient()) {
             String discoveryUrl = buildDiscoveryUrl();
             LOG.info("Discovering OIDC endpoints from {}", discoveryUrl);
-            
-            Response response = ClientBuilder.newClient()
+
+            Response response = client
                     .target(discoveryUrl)
                     .request()
                     .get();
@@ -57,13 +58,13 @@ public class DiscoveryService {
             JsonNode json = objectMapper.readTree(jsonString);
             
             // Extract standard OIDC discovery endpoints
-            discoveredEndpoints.put("issuer", getStringValue(json, "issuer"));
-            discoveredEndpoints.put("authorization_endpoint", getStringValue(json, "authorization_endpoint"));
-            discoveredEndpoints.put("token_endpoint", getStringValue(json, "token_endpoint"));
-            discoveredEndpoints.put("userinfo_endpoint", getStringValue(json, "userinfo_endpoint"));
-            discoveredEndpoints.put("jwks_uri", getStringValue(json, "jwks_uri"));
-            discoveredEndpoints.put("end_session_endpoint", getStringValue(json, "end_session_endpoint"));
-            
+            for (EndpointType endpointType : EndpointType.values()) {
+                String endpoint = getStringValue(json, endpointType.type());
+                if (endpoint != null) {
+                    discoveredEndpoints.put(endpointType, endpoint);
+                }
+            }
+
             LOG.info("Discovered OIDC endpoints: {}", discoveredEndpoints);
         } catch (Exception e) {
             LOG.error("Error discovering OIDC endpoints", e);
@@ -109,39 +110,36 @@ public class DiscoveryService {
         return node != null ? node.asText() : null;
     }
     
-    public String getEndpoint(String endpointType) {
+public String getEndpoint(EndpointType endpointType) {
         if (config.provider().discoveryEnabled() && discoveredEndpoints.containsKey(endpointType)) {
             return discoveredEndpoints.get(endpointType);
         }
         var authServerUrl = authServerUrl();
 
         // Fallback to configured values if discovery is disabled or endpoint not found
-        switch (endpointType) {
-            case "issuer":
-                return config.provider().issuer().orElse(authServerUrl);
-            case "authorization_endpoint":
-                return config.provider().authorizationPath()
-                        .map(path -> combinePath(authServerUrl, path))
-                        .orElse(null);
-            case "token_endpoint":
-                return config.provider().tokenPath()
-                        .map(path -> combinePath(authServerUrl, path))
-                        .orElse(null);
-            case "userinfo_endpoint":
-                return config.provider().userinfoPath()
-                        .map(path -> combinePath(authServerUrl, path))
-                        .orElse(null);
-            case "jwks_uri":
-                return config.provider().jwksPath()
-                        .map(path -> combinePath(authServerUrl, path))
-                        .orElse(null);
-            case "end_session_endpoint":
-                return config.provider().endSessionPath()
-                        .map(path -> combinePath(authServerUrl, path))
-                        .orElse(null);
-            default:
-                return null;
+        String endpoint = switch (endpointType) {
+            case ISSUER -> config.provider().issuer().orElse(authServerUrl);
+            case AUTHORIZATION_ENDPOINT -> config.provider().authorizationPath()
+                    .map(path -> combinePath(authServerUrl, path))
+                    .orElse(null);
+            case TOKEN_ENDPOINT -> config.provider().tokenPath()
+                    .map(path -> combinePath(authServerUrl, path))
+                    .orElse(null);
+            case USERINFO_ENDPOINT -> config.provider().userinfoPath()
+                    .map(path -> combinePath(authServerUrl, path))
+                    .orElse(null);
+            case JWKS_URI -> config.provider().jwksPath()
+                    .map(path -> combinePath(authServerUrl, path))
+                    .orElse(null);
+            case END_SESSION_ENDPOINT -> config.provider().endSessionPath()
+                    .map(path -> combinePath(authServerUrl, path))
+                    .orElse(null);
+            default -> null;
+        };
+        if (endpoint != null) {
+            discoveredEndpoints.put(endpointType, endpoint);
         }
+        return endpoint;
     }
     
     private String combinePath(String baseUrl, String path) {

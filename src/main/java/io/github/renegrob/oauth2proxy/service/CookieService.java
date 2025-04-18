@@ -5,44 +5,51 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.NewCookie;
 
+import java.time.Duration;
+
 @ApplicationScoped
 public class CookieService {
 
-    @Inject
-    OAuthConfig config;
+    private final OAuthConfig.CookieConfig config;
 
     @Inject
-    JwtService jwtService;
+    CookieService(OAuthConfig config) {
+        this.config = config.cookie();
+    }
+
+    public NewCookie createCookie(String name, String value) {
+        return createCookie(name, value, config.maxAge());
+    }
+
+    public NewCookie createCookie(String name, String value, Duration maxAge) {
+        return new NewCookie.Builder(name)
+                .value(value)
+                .path(config.path())
+                .domain(config.domain())
+                .maxAge((int) maxAge.toSeconds())
+                .secure(config.secure())
+                .httpOnly(config.httpOnly())
+                .sameSite(config.sameSite())
+                .build();
+    }
+
+    public NewCookie createSessionCookie(String name, String value) {
+        return new NewCookie.Builder(name)
+                .value(value)
+                .path(config.path())
+                .domain(config.domain())
+                .maxAge(-1)
+                .secure(config.secure())
+                .httpOnly(config.httpOnly())
+                .sameSite(config.sameSite())
+                .build();
+    }
 
     public NewCookie createAuthCookie(String token) {
-        return new NewCookie.Builder(config.cookie().name())
-                .value(token)
-                .path(config.cookie().path())
-                .domain(config.cookie().domain())
-                .maxAge((int) config.cookie().maxAge().toSeconds())
-                .secure(config.cookie().secure())
-                .httpOnly(config.cookie().httpOnly())
-                .sameSite(config.cookie().sameSite())
-                .build();
+        return createCookie(config.name(), token, config.maxAge());
     }
 
     public NewCookie createLogoutCookie() {
-        return new NewCookie.Builder(config.cookie().name())
-                .value("")
-                .path(config.cookie().path())
-                .domain(config.cookie().domain())
-                .maxAge(0)
-                .secure(config.cookie().secure())
-                .httpOnly(config.cookie().httpOnly())
-                .sameSite(config.cookie().sameSite())
-                .build();
-    }
-
-    public boolean isValidToken(String token) {
-        if (token == null || token.isEmpty()) {
-            return false;
-        }
-
-        return jwtService.validateToken(token);
+        return createCookie(config.name(), "", Duration.ZERO);
     }
 }

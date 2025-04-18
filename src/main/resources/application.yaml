@@ -1,4 +1,13 @@
+mp:
+  jwt:
+    verify:
+      publickey:
+        location: https://login.microsoftonline.com/58468c59-66de-48f6-9928-c5a9b13cfb6e/discovery/v2.0/keys
+      issuer: https://login.microsoftonline.com/58468c59-66de-48f6-9928-c5a9b13cfb6e/v2.0
+      audiences: api://2aa47cd8-73ac-4fff-8c1e-5b7e1e19b51e
 quarkus:
+  smallrye-jwt:
+    auth-mechanism: MP-JWT
   http:
     port: 8080
     cors:
@@ -9,29 +18,29 @@ quarkus:
       access-control-max-age: 24H
       access-control-allow-credentials: true
 
-  oidc:
-    roles:
-      source: idtoken
-      role-claim-path: roles
-    application-type: web-app
-    # The base URL for the provider - will be used for discovery
-    auth-server-url: ${OIDC_AUTH_SERVER_URL}
-    # Discovery will be enabled by default, provider endpoints will be fetched from well-known endpoint
-    discovery-enabled: ${OIDC_DISCOVERY_ENABLED:true}
-    client-id: ${OIDC_CLIENT_ID}
-    token-path: ${OIDC_TOKEN_PATH}
-    token:
-        issuer: ${OIDC_ISSUER}
-    credentials:
-      secret: ${OIDC_CLIENT_SECRET}
-    authentication:
-      scopes: ${OIDC_SCOPE:openid profile email}
-      redirect-path: /auth/callback
-      restore-path-after-redirect: false
-      cookie-path: /
-    logout:
-      # path: /auth/logout
-      post-logout-path: /
+#  oidc:
+#    roles:
+#      source: idtoken
+#      role-claim-path: roles
+#    application-type: web-app
+#    # The base URL for the provider - will be used for discovery
+#    auth-server-url: ${OIDC_AUTH_SERVER_URL}
+#    # Discovery will be enabled by default, provider endpoints will be fetched from well-known endpoint
+#    discovery-enabled: ${OIDC_DISCOVERY_ENABLED:true}
+#    client-id: ${OIDC_CLIENT_ID}
+#    token-path: ${OIDC_TOKEN_PATH}
+#    token:
+#        issuer: ${OIDC_ISSUER}
+#    credentials:
+#      secret: ${OIDC_CLIENT_SECRET}
+#    authentication:
+#      scopes: ${OIDC_SCOPE:openid profile email}
+#      redirect-path: /auth/callback
+#      restore-path-after-redirect: false
+#      cookie-path: /
+#    logout:
+#      # path: /auth/logout
+#      post-logout-path: /
   log:
     level: INFO
     category:
@@ -57,7 +66,7 @@ oauth2-proxy:
 #      pass-through-claims: ${JWT_PASS_THROUGH_CLAIMS:roles,groups,scp,email,given_name,family_name,name}
 #      pass-through-headers: ${JWT_PASS_THROUGH_HEADERS:true}
 #      claim-to-header-prefix: ${JWT_CLAIM_TO_HEADER_PREFIX:X-Auth-}
-  provider:
+  federated-idp:
     discovery-enabled: ${OIDC_DISCOVERY_ENABLED:true}
     discovery-path: ${OIDC_DISCOVERY_PATH:.well-known/openid-configuration}
     # The following properties are only used if discovery is disabled
@@ -68,3 +77,8 @@ oauth2-proxy:
     userinfo-path: ${OIDC_USERINFO_PATH:}
     end-session-path: ${OIDC_END_SESSION_PATH:}
     issuer: ${OIDC_ISSUER:}
+    client:
+      client-id: ${OIDC_CLIENT_ID}
+      client-secret: ${OIDC_CLIENT_SECRET}
+      scope: ${OIDC_SCOPE:openid profile email}
+      redirect-uri: ${OIDC_REDIRECT_URL}
