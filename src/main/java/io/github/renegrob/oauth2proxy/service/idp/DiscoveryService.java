@@ -18,6 +18,8 @@ import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static io.github.renegrob.oauth2proxy.OAuth2Util.uri;
+
 @ApplicationScoped
 @Unremovable
 @SuppressWarnings("unused")
@@ -29,6 +31,8 @@ public class DiscoveryService {
     
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Map<EndpointType, String> discoveredEndpoints = new ConcurrentHashMap<>();
+    private String jwksUri;
+    private String issuer;
     
     @PostConstruct
     void init() {
@@ -64,6 +68,8 @@ public class DiscoveryService {
                     discoveredEndpoints.put(endpointType, endpoint);
                 }
             }
+            jwksUri = getStringValue(json, "jwks_uri");
+            issuer = getStringValue(json, "issuer");
 
             LOG.info("Discovered OIDC endpoints: {}", discoveredEndpoints);
         } catch (Exception e) {
@@ -150,5 +156,13 @@ public String getEndpoint(EndpointType endpointType) {
         String base = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
         String pathToAppend = path.startsWith("/") ? path : "/" + path;
         return base + pathToAppend;
+    }
+
+    public String getIssuer() {
+        return issuer;
+    }
+
+    public URI getJwksUri() {
+        return uri(jwksUri);
     }
 }

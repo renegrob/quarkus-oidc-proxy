@@ -9,6 +9,7 @@ import java.net.URI;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @ConfigMapping(prefix = "oauth2-proxy")
 public interface OAuthConfig {
@@ -118,6 +119,9 @@ public interface OAuthConfig {
 
         @WithName("issuer")
         Optional<String> issuer();
+
+        @WithName("audience")
+        Optional<Set<String>> audience();
     }
 
     interface FederatedClientConfig {

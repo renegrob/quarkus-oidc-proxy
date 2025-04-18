@@ -1,7 +1,10 @@
 package io.github.renegrob.oauth2proxy.resource;
 
 import io.github.renegrob.oauth2proxy.service.CookieService;
+import io.github.renegrob.oauth2proxy.service.idp.ConfigurationService;
 import io.github.renegrob.oauth2proxy.service.idp.TokenExchangeService;
+import io.smallrye.jwt.auth.principal.DefaultJWTParser;
+import io.smallrye.jwt.auth.principal.ParseException;
 import jakarta.inject.Inject;
 import jakarta.json.JsonObject;
 import jakarta.ws.rs.CookieParam;
@@ -10,6 +13,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,10 +30,16 @@ public class CallbackResource {
     TokenExchangeService tokenService;
 
     @Inject
+    ConfigurationService configurationService;
+
+    @Inject
     CookieService cookieService;
 
+    @Inject
+    DefaultJWTParser jwtParser;
+
     @GET
-    public Response handleCode(@QueryParam("code") String code, @QueryParam("state") String state, @CookieParam(OAUTH_STATE) String cookieState) {
+    public Response handleCode(@QueryParam("code") String code, @QueryParam("state") String state, @CookieParam(OAUTH_STATE) String cookieState) throws ParseException {
         if (code == null) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Missing code").build();
         }
@@ -50,8 +60,20 @@ public class CallbackResource {
         LOG.info("Access token: {}", accessToken);
         LOG.info("ID token: {}", idToken);
 
+        JsonWebToken jsonWebToken = jwtParser.parse(idToken, configurationService.jwtAuthContextInfo());
+
         NewCookie cookie = cookieService.createCookie("access_token", accessToken);
 
-        return Response.ok("Logged in!\naccess_token:\n" + accessToken + "\nid_token:\n" + idToken).cookie(cookie).build();
+        return Response.ok(String.format(
+                        """
+                        Logged in as %s!
+                        
+                        access_token:
+                        %s
+                        
+                        id_token:
+                        %s
+                        """,
+                jsonWebToken.getClaim("email"), accessToken, idToken)).cookie(cookie).build();
     }
 }

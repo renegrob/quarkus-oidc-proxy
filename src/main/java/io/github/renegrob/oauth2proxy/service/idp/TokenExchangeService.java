@@ -5,6 +5,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.ClientErrorException;
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.core.Response;
 
 import java.io.StringReader;
 import java.net.URLEncoder;
@@ -41,12 +45,15 @@ public class TokenExchangeService {
 
             try (HttpClient httpClient = HttpClient.newHttpClient()) {
                 HttpResponse<String> response = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+                // TODO: improve error handling
+                if (response.statusCode() == 400) {
+                    throw new BadRequestException("Failed to exchange token: " + response.body());
+                }
                 if (response.statusCode() != 200) {
-                    throw new RuntimeException("Failed to exchange token: " + response.body());
+                    throw new InternalServerErrorException("Failed to exchange token: " + response.body());
                 }
                 return Json.createReader(new StringReader(response.body())).readObject();
             }
-
         } catch (Exception e) {
             throw new RuntimeException("Token exchange failed", e);
         }
