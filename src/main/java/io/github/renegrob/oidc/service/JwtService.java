@@ -1,6 +1,6 @@
-package io.github.renegrob.oauth2proxy.service;
+package io.github.renegrob.oidc.service;
 
-import io.github.renegrob.oauth2proxy.config.OAuthConfig;
+import io.github.renegrob.oidc.config.OAuthConfig;
 import io.smallrye.jwt.auth.principal.JWTParser;
 import io.smallrye.jwt.auth.principal.ParseException;
 import jakarta.enterprise.context.ApplicationScoped;

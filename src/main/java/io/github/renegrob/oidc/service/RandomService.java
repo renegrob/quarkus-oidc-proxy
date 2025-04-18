@@ -1,4 +1,4 @@
-package io.github.renegrob.oauth2proxy.service;
+package io.github.renegrob.oidc.service;
 
 import jakarta.inject.Singleton;
 

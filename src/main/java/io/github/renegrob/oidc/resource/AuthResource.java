@@ -1,8 +1,8 @@
-package io.github.renegrob.oauth2proxy.resource;
+package io.github.renegrob.oidc.resource;
 
-import io.github.renegrob.oauth2proxy.config.OAuthConfig;
-import io.github.renegrob.oauth2proxy.service.*;
-import io.github.renegrob.oauth2proxy.service.idp.DiscoveryService;
+import io.github.renegrob.oidc.config.OAuthConfig;
+import io.github.renegrob.oidc.service.*;
+import io.github.renegrob.oidc.service.idp.DiscoveryService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.util.Map;
 
-import static io.github.renegrob.oauth2proxy.service.idp.EndpointType.*;
+import static io.github.renegrob.oidc.service.idp.EndpointType.*;
 
 @Path("/authOld")
 @Produces(MediaType.APPLICATION_JSON)

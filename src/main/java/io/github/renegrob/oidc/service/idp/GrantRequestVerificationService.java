@@ -1,16 +1,16 @@
-package io.github.renegrob.oauth2proxy.service.idp;
+package io.github.renegrob.oidc.service.idp;
 
-import io.github.renegrob.oauth2proxy.config.OAuthConfig;
-import io.github.renegrob.oauth2proxy.service.CookieService;
-import io.github.renegrob.oauth2proxy.service.RandomService;
-import io.github.renegrob.oauth2proxy.util.HashUtil;
+import io.github.renegrob.oidc.config.OAuthConfig;
+import io.github.renegrob.oidc.service.CookieService;
+import io.github.renegrob.oidc.service.RandomService;
+import io.github.renegrob.oidc.util.HashUtil;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.github.renegrob.oauth2proxy.constants.CookieNames.OAUTH_STATE;
+import static io.github.renegrob.oidc.constants.CookieNames.OAUTH_STATE;
 
 @Singleton
 public class GrantRequestVerificationService {

@@ -1,9 +1,10 @@
-package io.github.renegrob.oauth2proxy.resource;
+package io.github.renegrob.oidc.resource;
 
-import io.github.renegrob.oauth2proxy.service.CookieService;
-import io.github.renegrob.oauth2proxy.service.idp.ConfigurationService;
-import io.github.renegrob.oauth2proxy.service.idp.GrantRequestVerificationService;
-import io.github.renegrob.oauth2proxy.service.idp.TokenExchangeService;
+import io.github.renegrob.oidc.service.CookieService;
+import io.github.renegrob.oidc.service.JwtManager;
+import io.github.renegrob.oidc.service.idp.ConfigurationService;
+import io.github.renegrob.oidc.service.idp.GrantRequestVerificationService;
+import io.github.renegrob.oidc.service.idp.TokenExchangeService;
 import io.smallrye.jwt.auth.principal.DefaultJWTParser;
 import io.smallrye.jwt.auth.principal.ParseException;
 import jakarta.inject.Inject;
@@ -18,7 +19,7 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.github.renegrob.oauth2proxy.constants.CookieNames.OAUTH_STATE;
+import static io.github.renegrob.oidc.constants.CookieNames.OAUTH_STATE;
 
 
 @Path("/auth/callback")
@@ -42,6 +43,9 @@ public class CallbackResource {
     @Inject
     DefaultJWTParser jwtParser;
 
+    @Inject
+    JwtManager jwtManager;
+
     @GET
     public Response handleCode(@QueryParam("code") String code, @QueryParam("state") String state, @CookieParam(OAUTH_STATE) String cookieState) throws ParseException {
         if (code == null) {
@@ -60,6 +64,8 @@ public class CallbackResource {
 
         NewCookie cookie = cookieService.createCookie("access_token", accessToken);
 
+        String internalJwt = jwtManager.createInternalJwt(jsonWebToken);
+
         return Response.ok(String.format(
                         """
                         Logged in as %s!
@@ -67,9 +73,12 @@ public class CallbackResource {
                         access_token:
                         %s
                         
-                        id_token:
+                        external_id_token:
+                        %s
+                        
+                        internal_id_token:
                         %s
                         """,
-                jsonWebToken.getClaim("email"), accessToken, idToken)).cookie(cookie).build();
+                jsonWebToken.getClaim("email"), accessToken, idToken, internalJwt)).cookie(cookie).build();
     }
 }

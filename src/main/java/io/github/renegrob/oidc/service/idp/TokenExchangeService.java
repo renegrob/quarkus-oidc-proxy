@@ -1,14 +1,12 @@
-package io.github.renegrob.oauth2proxy.service.idp;
+package io.github.renegrob.oidc.service.idp;
 
-import io.github.renegrob.oauth2proxy.config.OAuthConfig;
+import io.github.renegrob.oidc.config.OAuthConfig;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.ClientErrorException;
 import jakarta.ws.rs.InternalServerErrorException;
-import jakarta.ws.rs.core.Response;
 
 import java.io.StringReader;
 import java.net.URLEncoder;

@@ -1,6 +1,6 @@
-package io.github.renegrob.oauth2proxy.service.idp;
+package io.github.renegrob.oidc.service.idp;
 
-import io.github.renegrob.oauth2proxy.config.OAuthConfig;
+import io.github.renegrob.oidc.config.OAuthConfig;
 import io.smallrye.jwt.auth.principal.JWTAuthContextInfo;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -9,7 +9,7 @@ import jakarta.inject.Inject;
 import java.net.URI;
 import java.util.Optional;
 
-import static io.github.renegrob.oauth2proxy.util.OAuth2Util.uri;
+import static io.github.renegrob.oidc.util.OAuth2Util.uri;
 
 
 @ApplicationScoped

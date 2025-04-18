@@ -1,4 +1,4 @@
-package io.github.renegrob.oauth2proxy.service.idp;
+package io.github.renegrob.oidc.service.idp;
 
 import jakarta.ws.rs.core.NewCookie;
 

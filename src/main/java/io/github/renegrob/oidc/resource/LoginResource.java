@@ -1,7 +1,7 @@
-package io.github.renegrob.oauth2proxy.resource;
+package io.github.renegrob.oidc.resource;
 
-import io.github.renegrob.oauth2proxy.service.idp.GrantRequestVerificationService;
-import io.github.renegrob.oauth2proxy.service.idp.IdpConfiguration;
+import io.github.renegrob.oidc.service.idp.GrantRequestVerificationService;
+import io.github.renegrob.oidc.service.idp.IdpConfiguration;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;

@@ -1,4 +1,4 @@
-package io.github.renegrob.oauth2proxy.service;
+package io.github.renegrob.oidc.service;
 
 public interface SessionService {
     void store(String accessToken, String accessToken1);

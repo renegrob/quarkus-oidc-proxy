@@ -1,6 +1,6 @@
-package io.github.renegrob.oauth2proxy.service.idp;
+package io.github.renegrob.oidc.service.idp;
 
-import io.github.renegrob.oauth2proxy.config.OAuthConfig;
+import io.github.renegrob.oidc.config.OAuthConfig;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.arc.Unremovable;
@@ -18,7 +18,7 @@ import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static io.github.renegrob.oauth2proxy.util.OAuth2Util.uri;
+import static io.github.renegrob.oidc.util.OAuth2Util.uri;
 
 @ApplicationScoped
 @Unremovable
