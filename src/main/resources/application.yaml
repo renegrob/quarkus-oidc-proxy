@@ -3,8 +3,6 @@ mp:
     verify:
       publickey:
         location: https://login.microsoftonline.com/58468c59-66de-48f6-9928-c5a9b13cfb6e/discovery/v2.0/keys
-      issuer: https://login.microsoftonline.com/58468c59-66de-48f6-9928-c5a9b13cfb6e/v2.0
-      audiences: api://2aa47cd8-73ac-4fff-8c1e-5b7e1e19b51e
 quarkus:
   smallrye-jwt:
     auth-mechanism: MP-JWT
@@ -50,6 +48,7 @@ quarkus:
         level: DEBUG
 
 oauth2-proxy:
+  state-secret: ${STATE_SECRET}
   cookie:
     name: ${COOKIE_NAME:AUTH_TOKEN}
     path: ${COOKIE_PATH:/}
@@ -77,6 +76,7 @@ oauth2-proxy:
     userinfo-path: ${OIDC_USERINFO_PATH:}
     end-session-path: ${OIDC_END_SESSION_PATH:}
     issuer: ${OIDC_ISSUER:}
+    audience: ${OIDC_AUDIENCE:}
     client:
       client-id: ${OIDC_CLIENT_ID}
       client-secret: ${OIDC_CLIENT_SECRET}

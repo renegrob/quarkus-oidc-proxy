@@ -2,6 +2,7 @@ package io.github.renegrob.oauth2proxy.resource;
 
 import io.github.renegrob.oauth2proxy.service.CookieService;
 import io.github.renegrob.oauth2proxy.service.idp.ConfigurationService;
+import io.github.renegrob.oauth2proxy.service.idp.GrantRequestVerificationService;
 import io.github.renegrob.oauth2proxy.service.idp.TokenExchangeService;
 import io.smallrye.jwt.auth.principal.DefaultJWTParser;
 import io.smallrye.jwt.auth.principal.ParseException;
@@ -36,6 +37,9 @@ public class CallbackResource {
     CookieService cookieService;
 
     @Inject
+    GrantRequestVerificationService grantRequestVerificationService;
+
+    @Inject
     DefaultJWTParser jwtParser;
 
     @GET
@@ -43,15 +47,7 @@ public class CallbackResource {
         if (code == null) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Missing code").build();
         }
-        if (state == null) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("Missing state").build();
-        }
-        if (cookieState == null) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("Missing cookie").build();
-        }
-        if (!state.equals(cookieState)) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("State mismatch").build();
-        }
+        grantRequestVerificationService.verifyState(state, cookieState);
 
         JsonObject tokenResponse = tokenService.exchangeCodeForToken(code);
         String accessToken = tokenResponse.getString("access_token");

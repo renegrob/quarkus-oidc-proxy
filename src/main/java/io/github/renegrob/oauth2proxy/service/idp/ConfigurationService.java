@@ -9,7 +9,8 @@ import jakarta.inject.Inject;
 import java.net.URI;
 import java.util.Optional;
 
-import static io.github.renegrob.oauth2proxy.OAuth2Util.uri;
+import static io.github.renegrob.oauth2proxy.util.OAuth2Util.uri;
+
 
 @ApplicationScoped
 public class ConfigurationService implements IdpConfiguration {

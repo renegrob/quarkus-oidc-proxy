@@ -18,7 +18,7 @@ import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static io.github.renegrob.oauth2proxy.OAuth2Util.uri;
+import static io.github.renegrob.oauth2proxy.util.OAuth2Util.uri;
 
 @ApplicationScoped
 @Unremovable

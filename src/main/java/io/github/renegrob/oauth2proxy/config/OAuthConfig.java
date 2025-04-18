@@ -23,6 +23,9 @@ public interface OAuthConfig {
     @WithName("federated-idp")
     FederatedProviderConfig provider();
 
+    @WithName("state-secret")
+    String stateSecret();
+
     interface CookieConfig {
         @WithName("name")
         @WithDefault("AUTH_TOKEN")

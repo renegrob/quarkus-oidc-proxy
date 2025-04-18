@@ -1,4 +1,4 @@
-package io.github.renegrob.oauth2proxy;
+package io.github.renegrob.oauth2proxy.util;
 
 import java.net.URI;
 import java.net.URISyntaxException;
