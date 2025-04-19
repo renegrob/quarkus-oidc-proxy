@@ -42,7 +42,7 @@ public void verifyState(String state, String cookieState) {
         throw new BadRequestException("Missing cookie");
     }
     String stateHash = createStateHash(state);
-    LOG.info("verifying stateHash: '{}' against cookieState: '{}'", stateHash, cookieState);
+    LOG.debug("verifying stateHash: '{}' against cookieState: '{}'", stateHash, cookieState);
     if (!stateHash.equals(cookieState)) {
         throw new BadRequestException("State mismatch");
     }

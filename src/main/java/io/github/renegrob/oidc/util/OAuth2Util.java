@@ -5,6 +5,9 @@ import java.net.URISyntaxException;
 
 public final class OAuth2Util {
     public static URI uri(String uri) {
+        if (uri == null || uri.isEmpty()) {
+            return null;
+        }
         try {
             return new URI(uri);
         } catch (URISyntaxException e) {

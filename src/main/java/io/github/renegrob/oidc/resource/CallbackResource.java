@@ -1,11 +1,14 @@
 package io.github.renegrob.oidc.resource;
 
 import io.github.renegrob.oidc.service.CookieService;
-import io.github.renegrob.oidc.service.JwtManager;
+import io.github.renegrob.oidc.service.InternalIssuerService;
 import io.github.renegrob.oidc.service.idp.ConfigurationService;
 import io.github.renegrob.oidc.service.idp.GrantRequestVerificationService;
 import io.github.renegrob.oidc.service.idp.TokenExchangeService;
+import io.github.renegrob.oidc.service.idp.UserInfoService;
+import io.github.renegrob.oidc.service.jwt.JwtClaimsUtil;
 import io.smallrye.jwt.auth.principal.DefaultJWTParser;
+import io.smallrye.jwt.auth.principal.DefaultJWTTokenParser;
 import io.smallrye.jwt.auth.principal.ParseException;
 import jakarta.inject.Inject;
 import jakarta.json.JsonObject;
@@ -15,9 +18,12 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
-import org.eclipse.microprofile.jwt.JsonWebToken;
+import org.jose4j.jwt.JwtClaims;
+import org.jose4j.jwt.consumer.JwtContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Set;
 
 import static io.github.renegrob.oidc.constants.CookieNames.OAUTH_STATE;
 
@@ -28,8 +34,13 @@ public class CallbackResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(CallbackResource.class);
 
+    private final DefaultJWTTokenParser jwtTokenParser = new DefaultJWTTokenParser();
+
     @Inject
     TokenExchangeService tokenService;
+
+    @Inject
+    UserInfoService userInfoService;
 
     @Inject
     ConfigurationService configurationService;
@@ -44,7 +55,7 @@ public class CallbackResource {
     DefaultJWTParser jwtParser;
 
     @Inject
-    JwtManager jwtManager;
+    InternalIssuerService internalIssuerService;
 
     @GET
     public Response handleCode(@QueryParam("code") String code, @QueryParam("state") String state, @CookieParam(OAUTH_STATE) String cookieState) throws ParseException {
@@ -54,21 +65,29 @@ public class CallbackResource {
         grantRequestVerificationService.verifyState(state, cookieState);
 
         JsonObject tokenResponse = tokenService.exchangeCodeForToken(code);
-        String accessToken = tokenResponse.getString("access_token");
         String idToken = tokenResponse.getString("id_token");
+        String accessToken = tokenResponse.getString("access_token");
 
-        LOG.info("Access token: {}", accessToken);
-        LOG.info("ID token: {}", idToken);
+        JwtClaims claims;
+        if (idToken == null) {
+            LOG.info("Getting claims from access_token");
+            claims = userInfoService.getUserInfo(accessToken);
+        } else {
+            LOG.info("Getting claims from id_token");
+            JwtContext jsonWebToken = jwtTokenParser.parse(idToken, configurationService.jwtAuthContextInfo());
+            claims = JwtClaimsUtil.copy(jsonWebToken.getJwtClaims(), Set.of("raw_token"));
+        }
+        LOG.info("Claims: {}", claims);
 
-        JsonWebToken jsonWebToken = jwtParser.parse(idToken, configurationService.jwtAuthContextInfo());
-
-        NewCookie cookie = cookieService.createCookie("access_token", accessToken);
-
-        String internalJwt = jwtManager.createInternalJwt(jsonWebToken);
+        String internalJwt = internalIssuerService.createInternalJwt(claims);
+        NewCookie cookie = cookieService.createAuthCookie(internalJwt);
 
         return Response.ok(String.format(
                         """
                         Logged in as %s!
+                        
+                        claims:
+                        %s
                         
                         access_token:
                         %s
@@ -79,6 +98,6 @@ public class CallbackResource {
                         internal_id_token:
                         %s
                         """,
-                jsonWebToken.getClaim("email"), accessToken, idToken, internalJwt)).cookie(cookie).build();
+                claims.getClaimValue("email"), claims, accessToken, idToken, internalJwt)).cookie(cookie).build();
     }
 }

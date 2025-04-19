@@ -1,19 +1,20 @@
 package io.github.renegrob.oidc.service;
 
 import io.github.renegrob.oidc.config.OAuthConfig;
+import io.github.renegrob.oidc.service.jwt.ClaimsMapBuilder;
 import io.github.renegrob.oidc.util.HashBuilder;
 import io.smallrye.jwt.build.Jwt;
-import io.smallrye.jwt.build.JwtClaimsBuilder;
 import io.smallrye.jwt.util.KeyUtils;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
-import org.eclipse.microprofile.jwt.JsonWebToken;
+import org.jose4j.jwt.JwtClaims;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.GeneralSecurityException;
+import java.security.PrivateKey;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
@@ -26,52 +27,55 @@ import static java.util.stream.Collectors.toSet;
  */
 @ApplicationScoped
 @SuppressWarnings("unused")
-public class JwtManager {
+public class InternalIssuerService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(JwtManager.class);
+    private static final Logger LOG = LoggerFactory.getLogger(InternalIssuerService.class);
 
     private final OAuthConfig.InternalIssuerConfig issuerConfig;
+    private PrivateKey privateKey;
+    private String keyId;
 
     @Inject
-    JwtManager(OAuthConfig config) {
+    InternalIssuerService(OAuthConfig config) {
         this.issuerConfig = config.internalIssuer();
     }
 
     @PostConstruct
     public void initialize() throws GeneralSecurityException {
-        // KeyUtils.decodePrivateKey(issuerConfig.signingKey());
-
+        var keyConfig = issuerConfig.keyConfig();
+        privateKey = KeyUtils.decodePrivateKey(keyConfig.privateKey(), keyConfig.signatureAlgorithm());
+        keyId = keyConfig.keyId().orElseGet(() -> toKeyId(keyConfig.publicKey()));
     }
 
-    public String createInternalJwt(JsonWebToken externalJwt) {
+    public String createInternalJwt(JwtClaims source) {
         try {
-            JwtClaimsBuilder claimsBuilder = Jwt.claims()
-                    .subject(externalJwt.getSubject())
+            ClaimsMapBuilder claims = ClaimsMapBuilder.claims()
+                    .subject(source.getSubject())
                     .issuer(issuerConfig.issuer())
                     .audience(issuerConfig.audience())
                     .issuedAt(Instant.now())
-                    .expiresAt(Instant.now().plus(issuerConfig.expiration()))
+                    .expiresIn(issuerConfig.expiration())
                     .scope(issuerConfig.scope()
                             .map(sc -> Arrays.stream(sc.split(" ")).collect(toSet())).orElse(emptySet()));
 
             for (String name : issuerConfig.passThroughClaims()) {
-                Object value = externalJwt.getClaim(name);
+                Object value = source.getClaimValue(name);
                 if (value == null) {
                     throw new BadRequestException(String.format("Missing claim: %s", name));
                 }
-                claimsBuilder.claim(name, value);
+                claims.claim(name, value);
             }
             for (String name : issuerConfig.optionalPassThroughClaims()) {
-                Object value = externalJwt.getClaim(name);
+                Object value = source.getClaimValue(name);
                 if (value != null) {
-                    claimsBuilder.claim(name, value);
+                    claims.claim(name, value);
                 }
             }
 
             for (OAuthConfig.ClaimMapping claimMapping : issuerConfig.mapClaims().orElse(List.of())) {
-                Object value = externalJwt.getClaim(claimMapping.from());
+                Object value = source.getClaimValue(claimMapping.from());
                 if (value != null) {
-                    claimsBuilder.claim(claimMapping.to(), value);
+                    claims.claim(claimMapping.to(), value);
                 } else {
                     if (claimMapping.required()) {
                         throw new BadRequestException(String.format("Missing claim: %s", claimMapping.from()));
@@ -81,17 +85,15 @@ public class JwtManager {
 
             //TODO: add issuerConfig.scope().ifPresent(sc -> claimsBuilder.claim());
 
+            LOG.info("Internal claims: {}", claims.toMap());
 
             var keyConfig = issuerConfig.keyConfig();
 
-            LOG.info("privateKey: {}", keyConfig.privateKey());
-
-            String signed = claimsBuilder.jws()
-                    .keyId(keyConfig.keyId().orElseGet(() -> toKeyId(keyConfig.publicKey())))
+            String signed = Jwt.claims(claims.toMap()).jws()
+                    .keyId(keyId)
                     .algorithm(keyConfig.signatureAlgorithm())
-                    .sign(KeyUtils.decodePrivateKey(keyConfig.privateKey(), keyConfig.signatureAlgorithm()));
+                    .sign(privateKey);
 
-            LOG.info("Internal JWT: {}", signed);
             return signed;
         } catch (Exception e) {
 

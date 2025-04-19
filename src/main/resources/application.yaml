@@ -83,6 +83,7 @@ oidc:
       redirect-uri: ${OIDC_REDIRECT_URL}
   internal-issuer:
     issuer: ${OIDC_INTERNAL_ISSUER:}
+    pass-through-claims: ${OIDC_PASS_THROUGH_CLAIMS:roles,email,given_name,family_name,name}
     key:
         key-id:
         signature-algorithm: ES256

@@ -23,6 +23,7 @@ public class ConfigurationService implements IdpConfiguration {
     private URI tokenEndpoint;
     private String issuer;
     private URI jwksUri;
+    private Optional<URI> userInfoEndpoint;
 
     @Inject
     ConfigurationService(OAuthConfig config, DiscoveryService discoveryService) {
@@ -36,11 +37,13 @@ public class ConfigurationService implements IdpConfiguration {
         if (provider.discoveryEnabled()) {
             authorizationEndpoint= uri(discoveryService.getEndpoint(EndpointType.AUTHORIZATION_ENDPOINT));
             tokenEndpoint= uri(discoveryService.getEndpoint(EndpointType.TOKEN_ENDPOINT));
+            userInfoEndpoint = Optional.ofNullable(uri(discoveryService.getEndpoint(EndpointType.USERINFO_ENDPOINT)));
             issuer = discoveryService.getIssuer();
             jwksUri = discoveryService.getJwksUri();
         } else {
             authorizationEndpoint = combineURI(provider.authServerUrl(), provider.authorizationPath());
             tokenEndpoint = combineURI(provider.authServerUrl(), provider.tokenPath());
+            userInfoEndpoint = Optional.ofNullable(combineURI(provider.authServerUrl(), provider.userInfoPath()));
             issuer = provider.issuer().orElse(null);
             jwksUri = combineURI(provider.authServerUrl(), provider.jwksPath());
         }
@@ -55,6 +58,10 @@ public class ConfigurationService implements IdpConfiguration {
 
     public URI tokenEndpoint() {
         return tokenEndpoint;
+    }
+
+    public Optional<URI> userInfoEndpoint() {
+        return userInfoEndpoint;
     }
 
     @Override
@@ -78,6 +85,6 @@ public class ConfigurationService implements IdpConfiguration {
     }
 
     private URI combineURI(URI uri, Optional<String> path) {
-        return path.map(uri::resolve).orElse(uri);
+        return path.map(p -> URI.create(p).isAbsolute() ? URI.create(p) : uri.resolve(p)).orElse(null);
     }
 }

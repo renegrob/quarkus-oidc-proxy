@@ -131,6 +131,9 @@ public interface OAuthConfig {
 
         @WithName("audience")
         Optional<Set<String>> audience();
+
+        @WithName("userinfo-path")
+        Optional<String> userInfoPath();
     }
 
     interface FederatedClientConfig {

@@ -1,10 +1,21 @@
-package io.github.renegrob.oidc.service;
+package io.github.renegrob.oidc.service.jwt;
+import org.jose4j.jwt.NumericDate;
+
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 public class ClaimsMapBuilder {
     private final Map<String, Object> claims = new HashMap<>();
+
+    private ClaimsMapBuilder() {
+    }
+
+    public static ClaimsMapBuilder claims() {
+        return new ClaimsMapBuilder();
+    }
 
     public ClaimsMapBuilder issuer(String s) {
         claims.put("iss", s);
@@ -31,8 +42,18 @@ public class ClaimsMapBuilder {
         return this;
     }
 
+    public ClaimsMapBuilder issuedAt(Instant issuedAt) {
+        claims.put("iat", issuedAt.getEpochSecond());
+        return this;
+    }
+
     public ClaimsMapBuilder expiresAt(long l) {
         claims.put("exp", l);
+        return this;
+    }
+
+    public ClaimsMapBuilder expiresAt(Instant expiresAt) {
+        claims.put("exp", expiresAt.getEpochSecond());
         return this;
     }
 
@@ -41,6 +62,10 @@ public class ClaimsMapBuilder {
         long expirationTime = System.currentTimeMillis() / 1000 + l;
         claims.put("exp", expirationTime);
         return this;
+    }
+
+    public ClaimsMapBuilder expiresIn(Duration expiresIn) {
+        return expiresAt(Instant.now().plus(expiresIn));
     }
 
     public ClaimsMapBuilder groups(Set<String> set) {
