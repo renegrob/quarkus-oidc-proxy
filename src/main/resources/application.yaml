@@ -83,4 +83,17 @@ oidc:
       redirect-uri: ${OIDC_REDIRECT_URL}
   internal-issuer:
     issuer: ${OIDC_INTERNAL_ISSUER:}
-    signature-algorithm: PS256
+    key:
+        key-id:
+        signature-algorithm: ES256
+        private-key: |
+          -----BEGIN PRIVATE KEY-----
+          MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgjtKpJVhRyVlIo8HN
+          JqZpQAq0ObMHOE9YiE2RUM1/rYOhRANCAAR2nAMTJw6EUSL0D6zP0032VOc8/A88
+          xQI+XZ8ILiniXLi+8Xzh4u/K6dsoibESukFv+AiLx0YA13elVICS4ZmC
+          -----END PRIVATE KEY-----
+        public-key: |
+          -----BEGIN PUBLIC KEY-----
+          MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEdpwDEycOhFEi9A+sz9NN9lTnPPwP
+          PMUCPl2fCC4p4ly4vvF84eLvyunbKImxErpBb/gIi8dGANd3pVSAkuGZgg==
+          -----END PUBLIC KEY-----

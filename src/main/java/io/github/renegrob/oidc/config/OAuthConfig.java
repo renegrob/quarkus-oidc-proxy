@@ -4,6 +4,7 @@ import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithDefault;
 import io.smallrye.config.WithName;
 import io.smallrye.jwt.algorithm.SignatureAlgorithm;
+import io.smallrye.jwt.auth.cdi.OptionalClaimTypeProducer;
 import jakarta.ws.rs.core.NewCookie;
 
 import javax.swing.text.html.Option;
@@ -172,12 +173,8 @@ public interface OAuthConfig {
         @WithName("map-claims")
         Optional<List<ClaimMapping>> mapClaims();
 
-        @WithName("signature-algorithm")
-        @WithDefault("PS256")
-        SignatureAlgorithm signatureAlgorithm();
-
-//        @WithName("singing-key")
-//        String signingKey();
+        @WithName("key")
+        KeyConfig keyConfig();
     }
 
     interface ClaimMapping {
@@ -190,5 +187,28 @@ public interface OAuthConfig {
         @WithName("required")
         @WithDefault("false")
         boolean required();
+
+        @WithName("separator")
+        @WithDefault(",")
+        String separator();
+
+        @WithName("target-type")
+        @WithDefault("string")
+        ClaimType targetType();
+    }
+
+    interface KeyConfig {
+        @WithName("key-id")
+        Optional<String> keyId();
+
+        @WithName("signature-algorithm")
+        @WithDefault("ES256")
+        SignatureAlgorithm signatureAlgorithm();
+
+        @WithName("private-key")
+        String privateKey();
+
+        @WithName("public-key")
+        String publicKey();
     }
 }

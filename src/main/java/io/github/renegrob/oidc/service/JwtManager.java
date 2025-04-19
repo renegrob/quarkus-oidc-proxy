@@ -1,8 +1,10 @@
 package io.github.renegrob.oidc.service;
 
 import io.github.renegrob.oidc.config.OAuthConfig;
+import io.github.renegrob.oidc.util.HashBuilder;
 import io.smallrye.jwt.build.Jwt;
 import io.smallrye.jwt.build.JwtClaimsBuilder;
+import io.smallrye.jwt.util.KeyUtils;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -43,7 +45,7 @@ public class JwtManager {
 
     public String createInternalJwt(JsonWebToken externalJwt) {
         try {
-            JwtClaimsBuilder claimsBuilder = new FakeClaimsBuilder()
+            JwtClaimsBuilder claimsBuilder = Jwt.claims()
                     .subject(externalJwt.getSubject())
                     .issuer(issuerConfig.issuer())
                     .audience(issuerConfig.audience())
@@ -79,28 +81,26 @@ public class JwtManager {
 
             //TODO: add issuerConfig.scope().ifPresent(sc -> claimsBuilder.claim());
 
-            // Sign and build the JWT
-            // TODO: FIMXE: Sign!
-            String signed = claimsBuilder.toString();
 
-            LOG.info("Internal JWT: {}", claimsBuilder.toString());
+            var keyConfig = issuerConfig.keyConfig();
 
+            LOG.info("privateKey: {}", keyConfig.privateKey());
+
+            String signed = claimsBuilder.jws()
+                    .keyId(keyConfig.keyId().orElseGet(() -> toKeyId(keyConfig.publicKey())))
+                    .algorithm(keyConfig.signatureAlgorithm())
+                    .sign(KeyUtils.decodePrivateKey(keyConfig.privateKey(), keyConfig.signatureAlgorithm()));
+
+            LOG.info("Internal JWT: {}", signed);
             return signed;
         } catch (Exception e) {
+
             LOG.error("Failed to create JWT", e);
             throw new RuntimeException("Failed to create internal JWT token", e);
         }
     }
 
-    /**
-     * Gets the public JWK that can be used to verify tokens
-     *
-     * @return The public JWK in JSON format
-     */
-    public String getPublicJwk() {
-        // SmallRye JWT does not directly expose a method to retrieve the public JWK.
-        // You can configure the public key in your application properties for verification.
-        LOG.warn("Public JWK retrieval is not implemented. Configure the public key in your application properties.");
-        return "{}";
+    private static String toKeyId(String publicKey) {
+        return HashBuilder.sha256(publicKey).toBase64().substring(0, 10);
     }
 }

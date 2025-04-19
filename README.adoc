@@ -34,3 +34,17 @@ The included NGINX configuration uses the `auth_request` directive to validate r
 The application works with any OAuth2/OpenID Connect provider by setting the appropriate configuration in `application.yaml`. The design is completely stateless, storing all authentication information in cookies without using server-side sessions.
 
 To configure for a specific provider (like Google, EntraID, etc.), you only need to update the OIDC configuration variables in the YAML file or set the corresponding environment variables.
+
+
+== Generate Private and Public Keys
+
+=== Generate ES256 Keys
+
+[source, bash]
+----
+openssl ecparam -genkey -name prime256v1 -noout -out private_key.pem
+openssl pkcs8 -topk8 -inform PEM -outform PEM -in private_key.pem -out private_key_pkcs8.pem -nocrypt
+openssl ec -in private_key.pem -pubout -out public_key.pem
+cat private_key_pkcs8.pem
+cat public_key.pem
+----

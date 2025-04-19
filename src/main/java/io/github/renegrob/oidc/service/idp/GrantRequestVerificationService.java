@@ -3,7 +3,7 @@ package io.github.renegrob.oidc.service.idp;
 import io.github.renegrob.oidc.config.OAuthConfig;
 import io.github.renegrob.oidc.service.CookieService;
 import io.github.renegrob.oidc.service.RandomService;
-import io.github.renegrob.oidc.util.HashUtil;
+import io.github.renegrob.oidc.util.HashBuilder;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.BadRequestException;
@@ -49,6 +49,6 @@ public void verifyState(String state, String cookieState) {
 }
 
     private String createStateHash(String state) {
-        return HashUtil.generateBase64Sha512Hash(config.stateSecret() + state);
+        return HashBuilder.sha512(config.stateSecret() + state).toBase64();
     }
 }
