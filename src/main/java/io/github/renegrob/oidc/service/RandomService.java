@@ -4,7 +4,6 @@ import jakarta.inject.Singleton;
 
 import java.io.ByteArrayOutputStream;
 import java.security.SecureRandom;
-import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 import java.util.random.RandomGenerator;
@@ -39,15 +38,13 @@ public class RandomService {
         return randomGenerator;
     }
 
-    public String generateSecureState(int numberOfBytes) {
+    public byte[] randomBytes(int numberOfBytes) {
         // Generate random bytes using IntStream and convert to byte array
-        byte[] stateBytes = randomGenerator.ints(numberOfBytes, 0, 256)
+        return randomGenerator.ints(numberOfBytes, 0, 256)
                 .map(i -> i & 0xFF)
                 .collect(ByteArrayOutputStream::new,
                         (baos, i) -> baos.write(i),
                         (baos1, baos2) -> baos1.write(baos2.toByteArray(), 0, baos2.size()))
                 .toByteArray();
-
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(stateBytes);
     }
 }

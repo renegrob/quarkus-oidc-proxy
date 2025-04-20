@@ -18,13 +18,13 @@ import java.nio.charset.StandardCharsets;
 @ApplicationScoped
 public class TokenExchangeService {
 
-    private final ConfigurationService configurationService;
+    private final IdpConfigurationService idpConfigurationService;
     private final OAuthConfig.FederatedClientConfig clientConfig;
 
     @Inject
-    TokenExchangeService(OAuthConfig config, ConfigurationService configurationService) {
+    TokenExchangeService(OAuthConfig config, IdpConfigurationService idpConfigurationService) {
         this.clientConfig = config.provider().client();
-        this.configurationService = configurationService;
+        this.idpConfigurationService = idpConfigurationService;
     }
 
     public JsonObject exchangeCodeForToken(String code) {
@@ -36,7 +36,7 @@ public class TokenExchangeService {
                     "&redirect_uri=" + URLEncoder.encode(clientConfig.redirectUri().toString(), StandardCharsets.UTF_8);
 
             HttpRequest req = HttpRequest.newBuilder()
-                    .uri(configurationService.tokenEndpoint())
+                    .uri(idpConfigurationService.tokenEndpoint())
                     .header("Content-Type", "application/x-www-form-urlencoded")
                     .POST(HttpRequest.BodyPublishers.ofString(form))
                     .build();

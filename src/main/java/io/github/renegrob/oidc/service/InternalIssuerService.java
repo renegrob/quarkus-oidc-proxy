@@ -1,5 +1,6 @@
 package io.github.renegrob.oidc.service;
 
+import io.github.renegrob.oidc.config.FederationMode;
 import io.github.renegrob.oidc.config.OAuthConfig;
 import io.github.renegrob.oidc.service.jwt.ClaimsMapBuilder;
 import io.github.renegrob.oidc.util.HashBuilder;
@@ -34,20 +35,29 @@ public class InternalIssuerService {
     private final OAuthConfig.InternalIssuerConfig issuerConfig;
     private PrivateKey privateKey;
     private String keyId;
+    private FederationMode federationMode;
 
     @Inject
     InternalIssuerService(OAuthConfig config) {
         this.issuerConfig = config.internalIssuer();
+        this.federationMode = config.federationMode();
     }
 
     @PostConstruct
     public void initialize() throws GeneralSecurityException {
+        if (!isEnabled()) {
+            LOG.info("Internal issuer is disabled");
+            return;
+        }
         var keyConfig = issuerConfig.keyConfig();
         privateKey = KeyUtils.decodePrivateKey(keyConfig.privateKey(), keyConfig.signatureAlgorithm());
         keyId = keyConfig.keyId().orElseGet(() -> toKeyId(keyConfig.publicKey()));
     }
 
     public String createInternalJwt(JwtClaims source) {
+        if (!isEnabled()) {
+            throw new IllegalStateException("Internal issuer is disabled.");
+        }
         try {
             ClaimsMapBuilder claims = ClaimsMapBuilder.claims()
                     .subject(source.getSubject())
@@ -104,5 +114,9 @@ public class InternalIssuerService {
 
     private static String toKeyId(String publicKey) {
         return HashBuilder.sha256(publicKey).toBase64().substring(0, 10);
+    }
+
+    public boolean isEnabled() {
+        return federationMode != FederationMode.PASS_THROUGH;
     }
 }

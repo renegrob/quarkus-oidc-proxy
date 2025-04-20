@@ -38,7 +38,19 @@ public class HashBuilder {
         return this;
     }
 
+    public HashBuilder update(byte[] input) {
+        digest.update(input);
+        return this;
+    }
+
     public String toBase64() {
+        return toBase64(false);
+    }
+
+    public String toBase64(boolean withoutPadding) {
+        if (withoutPadding) {
+            return Base64.getEncoder().withoutPadding().encodeToString(digest.digest());
+        }
         return Base64.getEncoder().encodeToString(digest.digest());
     }
 

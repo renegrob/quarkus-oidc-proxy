@@ -16,6 +16,8 @@ public interface IdpConfiguration {
 
     URI redirectUri();
 
+    URI jwksUri();
+
     Object scope();
 
     JWTAuthContextInfo jwtAuthContextInfo();

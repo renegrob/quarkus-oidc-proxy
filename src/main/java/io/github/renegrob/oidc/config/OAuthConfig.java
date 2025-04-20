@@ -4,10 +4,8 @@ import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithDefault;
 import io.smallrye.config.WithName;
 import io.smallrye.jwt.algorithm.SignatureAlgorithm;
-import io.smallrye.jwt.auth.cdi.OptionalClaimTypeProducer;
 import jakarta.ws.rs.core.NewCookie;
 
-import javax.swing.text.html.Option;
 import java.net.URI;
 import java.time.Duration;
 import java.util.List;
@@ -17,14 +15,18 @@ import java.util.Set;
 @ConfigMapping(prefix = "oidc")
 public interface OAuthConfig {
 
+    @WithName("federation-mode")
+    @WithDefault("FEDERATE_FROM_ID_TOKEN")
+    FederationMode federationMode();
+
     @WithName("cookie")
     CookieConfig cookie();
 
     @WithName("federated-idp")
     FederatedProviderConfig provider();
 
-    @WithName("jwt")
-    JwtConfig jwt();
+    @WithName("token")
+    tokenConfig token();
 
     @WithName("internal-issuer")
     InternalIssuerConfig internalIssuer();
@@ -62,34 +64,14 @@ public interface OAuthConfig {
         Duration maxAge();
     }
 
-    interface JwtConfig {
-        @WithName("issuer-key")
-        @WithDefault("iss")
-        String issuerKey();
-
-        @WithName("subject-key")
-        @WithDefault("sub")
-        String subjectKey();
-
-        @WithName("expiration-key")
-        @WithDefault("exp")
-        String expirationKey();
-
+    interface tokenConfig {
         @WithName("header-name")
         @WithDefault("X-Auth-Token")
         String headerName();
 
-        @WithName("pass-through-claims")
-        @WithDefault("roles,groups,scp,email")
-        List<String> passThroughClaims();
-
-        @WithName("pass-through-headers")
-        @WithDefault("true")
-        boolean passThroughHeaders();
-
-        @WithName("claim-to-header-prefix")
-        @WithDefault("X-Auth-")
-        String claimToHeaderPrefix();
+        @WithName("forwarding-method")
+        @WithDefault("HEADER") // Default to HEADER
+        TokenForwardingMethod forwardingMethod();
     }
 
     interface FederatedProviderConfig {

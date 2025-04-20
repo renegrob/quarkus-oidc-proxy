@@ -27,80 +27,14 @@ public class AuthResource {
     private static final Logger LOG = LoggerFactory.getLogger(AuthResource.class);
 
     @Inject
-    JsonWebToken idToken;
-
-//    @Inject
-//    RefreshToken refreshToken;
-
-    @Inject
     CookieService cookieService;
 
     @Inject
     OAuthConfig config;
 
     @Inject
-    JwtService jwtService;
-
-    @Inject
     DiscoveryService discoveryService;
 
-
-    @GET
-    @Path("/validate")
-    public RestResponse<Void> validate(@RestCookie("AUTH_TOKEN") String token) {
-        if (token == null || token.isEmpty()) {
-            LOG.debug("No auth token found in cookie");
-            return RestResponse.status(Response.Status.UNAUTHORIZED);
-        }
-
-        if (isValidToken(token)) {
-            LOG.debug("Token is valid");
-            RestResponse.ResponseBuilder<Void> responseBuilder = RestResponse.ResponseBuilder.<Void>ok()
-                    .header(config.jwt().headerName(), token);
-
-            // Extract claims and pass them through as headers if configured
-            if (config.jwt().passThroughHeaders()) {
-                Map<String, Object> claims = jwtService.extractClaims(token);
-
-                for (Map.Entry<String, Object> entry : claims.entrySet()) {
-                    String claimName = entry.getKey();
-                    Object claimValue = entry.getValue();
-
-                    // Skip standard JWT claims we already handle
-                    if (claimName.equals(config.jwt().subjectKey()) ||
-                            claimName.equals(config.jwt().issuerKey()) ||
-                            claimName.equals(config.jwt().expirationKey())) {
-                        continue;
-                    }
-
-                    // For arrays/lists, join with commas
-                    if (claimValue instanceof Iterable) {
-                        StringBuilder sb = new StringBuilder();
-                        boolean first = true;
-                        for (Object item : (Iterable<?>) claimValue) {
-                            if (!first) {
-                                sb.append(",");
-                            }
-                            sb.append(item);
-                            first = false;
-                        }
-                        responseBuilder.header(config.jwt().claimToHeaderPrefix() + claimName, sb.toString());
-                    } else {
-                        responseBuilder.header(config.jwt().claimToHeaderPrefix() + claimName, claimValue.toString());
-                    }
-                }
-            }
-
-            return responseBuilder.build();
-        } else {
-            LOG.debug("Token is invalid or expired");
-            return RestResponse.status(Response.Status.UNAUTHORIZED);
-        }
-    }
-
-    private boolean isValidToken(String token) {
-        return false;
-    }
 
     @GET
     @Path("/logout")

@@ -13,7 +13,7 @@ import static io.github.renegrob.oidc.util.OAuth2Util.uri;
 
 
 @ApplicationScoped
-public class ConfigurationService implements IdpConfiguration {
+public class IdpConfigurationService implements IdpConfiguration {
 
     private final OAuthConfig.FederatedProviderConfig provider;
     private final OAuthConfig.FederatedClientConfig clientConfig;
@@ -26,7 +26,7 @@ public class ConfigurationService implements IdpConfiguration {
     private Optional<URI> userInfoEndpoint;
 
     @Inject
-    ConfigurationService(OAuthConfig config, DiscoveryService discoveryService) {
+    IdpConfigurationService(OAuthConfig config, DiscoveryService discoveryService) {
         this.discoveryService = discoveryService;
         provider = config.provider();
         clientConfig = provider.client();
@@ -72,6 +72,11 @@ public class ConfigurationService implements IdpConfiguration {
     @Override
     public URI redirectUri() {
         return clientConfig.redirectUri();
+    }
+
+    @Override
+    public URI jwksUri() {
+        return jwksUri;
     }
 
     @Override

@@ -2,12 +2,9 @@ package io.github.renegrob.oidc.service.idp;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.json.Json;
-import jakarta.json.JsonObject;
 import jakarta.ws.rs.InternalServerErrorException;
 import org.jose4j.jwt.JwtClaims;
 
-import java.io.StringReader;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -19,8 +16,8 @@ public class UserInfoService {
     private final URI userInfoEndpoint;
 
     @Inject
-    UserInfoService(ConfigurationService configurationService) {
-        this.userInfoEndpoint = configurationService.userInfoEndpoint().orElse(null);
+    UserInfoService(IdpConfigurationService idpConfigurationService) {
+        this.userInfoEndpoint = idpConfigurationService.userInfoEndpoint().orElse(null);
     }
 
     public JwtClaims getUserInfo(String accessToken) {

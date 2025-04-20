@@ -1,13 +1,11 @@
 package io.github.renegrob.oidc.resource;
 
+import io.github.renegrob.oidc.config.FederationMode;
+import io.github.renegrob.oidc.config.OAuthConfig;
 import io.github.renegrob.oidc.service.CookieService;
 import io.github.renegrob.oidc.service.InternalIssuerService;
-import io.github.renegrob.oidc.service.idp.ConfigurationService;
-import io.github.renegrob.oidc.service.idp.GrantRequestVerificationService;
-import io.github.renegrob.oidc.service.idp.TokenExchangeService;
-import io.github.renegrob.oidc.service.idp.UserInfoService;
+import io.github.renegrob.oidc.service.idp.*;
 import io.github.renegrob.oidc.service.jwt.JwtClaimsUtil;
-import io.smallrye.jwt.auth.principal.DefaultJWTParser;
 import io.smallrye.jwt.auth.principal.DefaultJWTTokenParser;
 import io.smallrye.jwt.auth.principal.ParseException;
 import jakarta.inject.Inject;
@@ -37,13 +35,16 @@ public class CallbackResource {
     private final DefaultJWTTokenParser jwtTokenParser = new DefaultJWTTokenParser();
 
     @Inject
+    OAuthConfig config;
+
+    @Inject
     TokenExchangeService tokenService;
 
     @Inject
     UserInfoService userInfoService;
 
     @Inject
-    ConfigurationService configurationService;
+    IdpConfigurationService idpConfigurationService;
 
     @Inject
     CookieService cookieService;
@@ -52,7 +53,7 @@ public class CallbackResource {
     GrantRequestVerificationService grantRequestVerificationService;
 
     @Inject
-    DefaultJWTParser jwtParser;
+    ExternalJwtValidatorService externalJwtValidatorService;
 
     @Inject
     InternalIssuerService internalIssuerService;
@@ -69,18 +70,30 @@ public class CallbackResource {
         String accessToken = tokenResponse.getString("access_token");
 
         JwtClaims claims;
-        if (idToken == null) {
+        if (config.federationMode() == FederationMode.FEDERATE_FROM_ACCESS_TOKEN) {
             LOG.info("Getting claims from access_token");
+            if (accessToken == null) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("Missing access_token").build();
+            }
             claims = userInfoService.getUserInfo(accessToken);
         } else {
             LOG.info("Getting claims from id_token");
-            JwtContext jsonWebToken = jwtTokenParser.parse(idToken, configurationService.jwtAuthContextInfo());
+            if (idToken == null) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("Missing id_token").build();
+            }
+            JwtContext jsonWebToken = externalJwtValidatorService.parse(idToken);
             claims = JwtClaimsUtil.copy(jsonWebToken.getJwtClaims(), Set.of("raw_token"));
         }
         LOG.info("Claims: {}", claims);
 
-        String internalJwt = internalIssuerService.createInternalJwt(claims);
-        NewCookie cookie = cookieService.createAuthCookie(internalJwt);
+        String internalToken;
+        if (config.federationMode() == FederationMode.PASS_THROUGH) {
+            internalToken = idToken;
+        } else {
+            internalToken = internalIssuerService.createInternalJwt(claims);
+        }
+
+        NewCookie cookie = cookieService.createAuthCookie(internalToken);
 
         return Response.ok(String.format(
                         """
@@ -98,6 +111,6 @@ public class CallbackResource {
                         internal_id_token:
                         %s
                         """,
-                claims.getClaimValue("email"), claims, accessToken, idToken, internalJwt)).cookie(cookie).build();
+                claims.getClaimValue("email"), claims, accessToken, idToken, internalToken)).cookie(cookie).build();
     }
 }

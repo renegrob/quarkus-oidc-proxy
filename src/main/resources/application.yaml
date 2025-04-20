@@ -1,10 +1,4 @@
-smallrye:
-  jwt:
-    new-token:
-      signature-algorithm: ${oidc.signature-algorithm:PS256}
 quarkus:
-  smallrye-jwt:
-    auth-mechanism: MP-JWT
   http:
     port: 8080
     cors:
@@ -19,11 +13,6 @@ quarkus:
 #    roles:
 #      source: idtoken
 #      role-claim-path: roles
-#    application-type: web-app
-#    # The base URL for the provider - will be used for discovery
-#    auth-server-url: ${OIDC_AUTH_SERVER_URL}
-#    # Discovery will be enabled by default, provider endpoints will be fetched from well-known endpoint
-#    discovery-enabled: ${OIDC_DISCOVERY_ENABLED:true}
 #    client-id: ${OIDC_CLIENT_ID}
 #    token-path: ${OIDC_TOKEN_PATH}
 #    token:
@@ -41,9 +30,7 @@ quarkus:
   log:
     level: INFO
     category:
-      "io.quarkus.oidc":
-        level: DEBUG
-      "com.example.oauth2proxy":
+      "io.github.renegrob.oidc":
         level: DEBUG
 
 oidc:
@@ -56,14 +43,7 @@ oidc:
     http-only: ${COOKIE_HTTP_ONLY:true}
     same-site: ${COOKIE_SAME_SITE:Lax}
     max-age: ${COOKIE_MAX_AGE:24h}
-#    jwt:
-#      issuer-key: ${JWT_ISSUER_KEY:iss}
-#      subject-key: ${JWT_SUBJECT_KEY:sub}
-#      expiration-key: ${JWT_EXPIRATION_KEY:exp}
-#      header-name: ${JWT_HEADER_NAME:X-Auth-Token}
-#      pass-through-claims: ${JWT_PASS_THROUGH_CLAIMS:roles,groups,scp,email,given_name,family_name,name}
-#      pass-through-headers: ${JWT_PASS_THROUGH_HEADERS:true}
-#      claim-to-header-prefix: ${JWT_CLAIM_TO_HEADER_PREFIX:X-Auth-}
+  federation-mode: ${OIDC_FEDERATION_MODE:FEDERATE_FROM_ID_TOKEN}
   federated-idp:
     discovery-enabled: ${OIDC_DISCOVERY_ENABLED:true}
     discovery-path: ${OIDC_DISCOVERY_PATH:.well-known/openid-configuration}
@@ -87,12 +67,7 @@ oidc:
     key:
         key-id:
         signature-algorithm: ES256
-        private-key: |
-          -----BEGIN PRIVATE KEY-----
-          MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgjtKpJVhRyVlIo8HN
-          JqZpQAq0ObMHOE9YiE2RUM1/rYOhRANCAAR2nAMTJw6EUSL0D6zP0032VOc8/A88
-          xQI+XZ8ILiniXLi+8Xzh4u/K6dsoibESukFv+AiLx0YA13elVICS4ZmC
-          -----END PRIVATE KEY-----
+        private-key: ${OIDC_INTERNAL_ISSUER_PRIVATE_KEY}
         public-key: |
           -----BEGIN PUBLIC KEY-----
           MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEdpwDEycOhFEi9A+sz9NN9lTnPPwP

@@ -16,7 +16,7 @@ The `OAuthConfig` class uses `@ConfigMapping` to bind YAML configuration propert
 === Key Services
 
 * *CookieService*: Manages creation and validation of authentication cookies
-* *JwtService*: Handles JWT token validation and claim extraction
+* *InternalJwtValidatorService*: Handles JWT token validation and claim extraction
 
 === REST Endpoints
 
