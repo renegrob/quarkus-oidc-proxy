@@ -10,22 +10,10 @@ quarkus:
       access-control-allow-credentials: true
 
 #  oidc:
-#    roles:
-#      source: idtoken
-#      role-claim-path: roles
-#    client-id: ${OIDC_CLIENT_ID}
-#    token-path: ${OIDC_TOKEN_PATH}
-#    token:
-#        issuer: ${OIDC_ISSUER}
-#    credentials:
-#      secret: ${OIDC_CLIENT_SECRET}
 #    authentication:
-#      scopes: ${OIDC_SCOPE:openid profile email}
 #      redirect-path: /auth/callback
 #      restore-path-after-redirect: false
-#      cookie-path: /
 #    logout:
-#      # path: /auth/logout
 #      post-logout-path: /
   log:
     level: INFO

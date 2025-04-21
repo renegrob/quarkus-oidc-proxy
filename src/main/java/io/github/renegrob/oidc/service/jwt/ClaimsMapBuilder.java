@@ -103,6 +103,11 @@ public class ClaimsMapBuilder {
         return this;
     }
 
+    public ClaimsMapBuilder nonce(String nonce) {
+        claims.put("nonce", nonce);
+        return this;
+    }
+
     /**
      * Returns the map of claims
      * @return A map containing all the JWT claims
@@ -114,4 +119,5 @@ public class ClaimsMapBuilder {
     public String toString() {
         return getClass().getSimpleName() + "{claims=" + claims + "}";
     }
+
 }

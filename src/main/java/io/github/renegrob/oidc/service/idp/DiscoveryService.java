@@ -116,7 +116,7 @@ public class DiscoveryService {
         return node != null ? node.asText() : null;
     }
     
-public String getEndpoint(EndpointType endpointType) {
+    public String getEndpoint(EndpointType endpointType) {
         if (config.provider().discoveryEnabled() && discoveredEndpoints.containsKey(endpointType)) {
             return discoveredEndpoints.get(endpointType);
         }
