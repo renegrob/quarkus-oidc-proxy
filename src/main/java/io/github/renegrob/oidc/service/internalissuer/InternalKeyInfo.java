@@ -55,6 +55,6 @@ public class InternalKeyInfo {
     }
 
     private static String toKeyId(PublicKey publicKey) {
-        return HashBuilder.sha256(publicKey.getEncoded()).toBase64().substring(0, 10);
+        return HashBuilder.sha256(publicKey.getEncoded()).toUrlSafeBase64().substring(0, 12);
     }
 }

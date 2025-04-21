@@ -58,6 +58,10 @@ public class HashBuilder {
         return Base64.getEncoder().encodeToString(digest.digest());
     }
 
+    public String toUrlSafeBase64() {
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(digest.digest());
+    }
+
     public String toHex() {
         byte[] hashBytes = digest.digest();
         StringBuilder hexString = new StringBuilder();

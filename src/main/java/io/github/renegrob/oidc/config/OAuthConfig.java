@@ -158,6 +158,9 @@ public interface OAuthConfig {
         @WithName("map-claims")
         Optional<List<ClaimMapping>> mapClaims();
 
+        @WithName("translate-claim-items")
+        Optional<List<TranslateClaimItems>> translateClaimItems();
+
         @WithName("key")
         KeyConfig keyConfig();
     }
@@ -180,6 +183,21 @@ public interface OAuthConfig {
         @WithName("target-type")
         @WithDefault("string")
         ClaimType targetType();
+    }
+
+    interface TranslateClaimItems {
+        @WithName("claim")
+        String claimName();
+
+        @WithName("from-values")
+        String fromValues();
+
+        @WithName("to-values")
+        String toValues();
+
+        @WithName("remove-non-matching")
+        @WithDefault("true")
+        boolean removeNonMatching();
     }
 
     interface KeyConfig {

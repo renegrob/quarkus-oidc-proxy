@@ -16,10 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.security.PrivateKey;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.*;
 
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toSet;
@@ -38,6 +35,7 @@ public class InternalIssuerService {
     private final FederationMode federationMode;
     private final PrivateKey privateKey;
     private final String keyId;
+    private final Map<String, ClaimTranslationRule> claimTranslations;
 
     @Inject
     InternalIssuerService(OAuthConfig config, InternalKeyInfo internalKeyInfo, RandomService randomService) {
@@ -46,6 +44,29 @@ public class InternalIssuerService {
         this.privateKey = internalKeyInfo.privateKey();
         this.keyId = internalKeyInfo.keyId();
         this.randomService = randomService;
+        this.claimTranslations = createClaimTranslations(config.internalIssuer().translateClaimItems());
+    }
+
+    private Map<String, ClaimTranslationRule> createClaimTranslations(Optional<List<OAuthConfig.TranslateClaimItems>> translateClaimItems) {
+        Map<String, ClaimTranslationRule> claimTranslations = new HashMap<>();
+        if (translateClaimItems.isPresent()) {
+            for (OAuthConfig.TranslateClaimItems item : translateClaimItems.get()) {
+                Map<String, String> translations = new HashMap<>();
+                claimTranslations.put(item.claimName(), new ClaimTranslationRule(item.claimName(), translations, item.removeNonMatching()));
+                List<String> fromValues = Arrays.asList(item.fromValues().split("\\s*,\\s*"));
+                List<String> toValues = Arrays.asList(item.toValues().split("\\s*,\\s*"));
+                if (fromValues.size() != toValues.size()) {
+                    throw new IllegalArgumentException(String.format(
+                            "fromValues and toValues must have the same size: %s vs %s", fromValues, toValues));
+                }
+                for (int i = 0; i < fromValues.size(); i++) {
+                    String fromValue = fromValues.get(i);
+                    String toValue = toValues.get(i);
+                    translations.put(fromValue, toValue);
+                }
+            }
+        }
+        return claimTranslations;
     }
 
     public String createInternalJwt(JwtClaims source) {
@@ -88,6 +109,8 @@ public class InternalIssuerService {
                 }
             }
 
+            translateClaims(claims);
+
             LOG.info("Internal claims: {}", claims.toMap());
 
             var keyConfig = issuerConfig.keyConfig();
@@ -104,6 +127,18 @@ public class InternalIssuerService {
             throw new RuntimeException("Failed to create internal JWT token", e);
         }
     }
+
+    private void translateClaims(ClaimsMapBuilder claims) {
+        for (String claimName : claims.keySet()) {
+            ClaimTranslationRule translations = claimTranslations.get(claimName);
+            if (translations != null) {
+                Object value = claims.get(claimName);
+                var translatedValue = translations.translateClaimValue(value);
+                claims.claim(claimName, translatedValue);
+            }
+        }
+    }
+
 
     private Object mapValue(Object value, OAuthConfig.ClaimMapping claimMapping) {
         if (claimMapping.targetType() == ClaimType.STRING) {

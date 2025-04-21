@@ -1,5 +1,4 @@
 package io.github.renegrob.oidc.service.jwt;
-import org.jose4j.jwt.NumericDate;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -116,8 +115,15 @@ public class ClaimsMapBuilder {
         return new HashMap<>(claims);
     }
 
+    public Set<String> keySet() {
+        return claims.keySet();
+    }
+
     public String toString() {
         return getClass().getSimpleName() + "{claims=" + claims + "}";
     }
 
+    public Object get(String claimName) {
+        return claims.get(claimName);
+    }
 }
