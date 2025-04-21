@@ -3,7 +3,7 @@ package io.github.renegrob.oidc.resource;
 import io.github.renegrob.oidc.config.FederationMode;
 import io.github.renegrob.oidc.config.OAuthConfig;
 import io.github.renegrob.oidc.service.CookieService;
-import io.github.renegrob.oidc.service.InternalIssuerService;
+import io.github.renegrob.oidc.service.internalissuer.InternalIssuerService;
 import io.github.renegrob.oidc.service.idp.*;
 import io.github.renegrob.oidc.service.jwt.JwtClaimsUtil;
 import io.smallrye.jwt.auth.principal.DefaultJWTTokenParser;

@@ -3,7 +3,7 @@ package io.github.renegrob.oidc.resource;
 import io.github.renegrob.oidc.config.FederationMode;
 import io.github.renegrob.oidc.config.OAuthConfig;
 import io.github.renegrob.oidc.service.CookieService;
-import io.github.renegrob.oidc.service.InternalJwtValidatorService;
+import io.github.renegrob.oidc.service.internalissuer.InternalJwtValidatorService;
 import io.github.renegrob.oidc.service.idp.ExternalJwtValidatorService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;

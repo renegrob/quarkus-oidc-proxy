@@ -33,6 +33,10 @@ public class HashBuilder {
         return new HashBuilder(HashAlgorithm.SHA_256).update(input);
     }
 
+    public static HashBuilder sha256(byte[] input) {
+        return new HashBuilder(HashAlgorithm.SHA_256).update(input);
+    }
+
     public HashBuilder update(String input) {
         digest.update(input.getBytes(StandardCharsets.UTF_8));
         return this;

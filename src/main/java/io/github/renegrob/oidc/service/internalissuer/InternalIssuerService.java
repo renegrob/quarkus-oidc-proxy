@@ -1,14 +1,12 @@
-package io.github.renegrob.oidc.service;
+package io.github.renegrob.oidc.service.internalissuer;
 
 import io.github.renegrob.oidc.config.ClaimType;
 import io.github.renegrob.oidc.config.FederationMode;
 import io.github.renegrob.oidc.config.OAuthConfig;
+import io.github.renegrob.oidc.service.RandomService;
 import io.github.renegrob.oidc.service.jwt.ClaimsMapBuilder;
 import io.github.renegrob.oidc.util.Base64Util;
-import io.github.renegrob.oidc.util.HashBuilder;
 import io.smallrye.jwt.build.Jwt;
-import io.smallrye.jwt.util.KeyUtils;
-import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
@@ -16,7 +14,6 @@ import org.jose4j.jwt.JwtClaims;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.time.Instant;
 import java.util.Arrays;
@@ -38,30 +35,21 @@ public class InternalIssuerService {
 
     private final OAuthConfig.InternalIssuerConfig issuerConfig;
     private final RandomService randomService;
-    private PrivateKey privateKey;
-    private String keyId;
-    private FederationMode federationMode;
+    private final FederationMode federationMode;
+    private final PrivateKey privateKey;
+    private final String keyId;
 
     @Inject
-    InternalIssuerService(OAuthConfig config, RandomService randomService) {
-        this.issuerConfig = config.internalIssuer();
+    InternalIssuerService(OAuthConfig config, InternalKeyInfo internalKeyInfo, RandomService randomService) {
         this.federationMode = config.federationMode();
+        this.issuerConfig = config.internalIssuer();
+        this.privateKey = internalKeyInfo.privateKey();
+        this.keyId = internalKeyInfo.keyId();
         this.randomService = randomService;
     }
 
-    @PostConstruct
-    public void initialize() throws GeneralSecurityException {
-        if (!isEnabled()) {
-            LOG.info("Internal issuer is disabled");
-            return;
-        }
-        var keyConfig = issuerConfig.keyConfig();
-        privateKey = KeyUtils.decodePrivateKey(keyConfig.privateKey(), keyConfig.signatureAlgorithm());
-        keyId = keyConfig.keyId().orElseGet(() -> toKeyId(keyConfig.publicKey()));
-    }
-
     public String createInternalJwt(JwtClaims source) {
-        if (!isEnabled()) {
+        if (isPassThrough()) {
             throw new IllegalStateException("Internal issuer is disabled.");
         }
         try {
@@ -100,7 +88,6 @@ public class InternalIssuerService {
                 }
             }
 
-
             LOG.info("Internal claims: {}", claims.toMap());
 
             var keyConfig = issuerConfig.keyConfig();
@@ -131,7 +118,7 @@ public class InternalIssuerService {
             return switch (value) {
                 case Collection<?> objects ->
                         objects.stream().map(Object::toString).toList();
-                case Object[] objects -> new LinkedHashSet<?>(objects);
+                case Object[] objects -> new LinkedHashSet<>(Arrays.asList(objects));
                 case String s -> new LinkedHashSet<>(Arrays.asList(s.split(claimMapping.separator())));
                 default -> new LinkedHashSet<>(List.of(value));
             };
@@ -164,11 +151,7 @@ public class InternalIssuerService {
         return Base64Util.toBase64(randomService.randomBytes(32), true);
     }
 
-    private static String toKeyId(String publicKey) {
-        return HashBuilder.sha256(publicKey).toBase64().substring(0, 10);
-    }
-
-    public boolean isEnabled() {
-        return federationMode != FederationMode.PASS_THROUGH;
+    private boolean isPassThrough() {
+        return federationMode == FederationMode.PASS_THROUGH;
     }
 }
