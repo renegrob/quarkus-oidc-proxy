@@ -52,11 +52,14 @@ oidc:
   internal-issuer:
     issuer: ${OIDC_INTERNAL_ISSUER:}
     pass-through-claims: ${OIDC_PASS_THROUGH_CLAIMS:roles,email,given_name,family_name,name}
-    translate-claim-items:
+    claim-mappings:
       - claim: roles
-        from-values: bcecbcf7-e7f1-4896-a006-e120ebeb2b7c, e3ac9c51-3af6-4ab8-8465-a181fe83f592
-        to-values: MyBackend-Group1, MyBackend-Group2
-        remove-non-matching: false
+        value-mappings:
+         - from: bcecbcf7-e7f1-4896-a006-e120ebeb2b7c
+           to: MyBackend-Group1
+         - from: e3ac9c51-3af6-4ab8-8465-a181fe83f592
+           to: MyBackend-Group2
+        remove-non-matching: true
     key:
         key-id:
         signature-algorithm: ES256

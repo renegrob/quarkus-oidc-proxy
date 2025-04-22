@@ -3,31 +3,20 @@
 :icons: font
 :source-highlighter: highlight.js
 
-This Quarkus application handles OAuth2/OpenID Connect authentication for NGINX using the stateless cookie approach.
-
-== Key Components
-
-=== Build Configuration
-The `build.gradle.kts` file sets up the project with Quarkus dependencies for OIDC, RESTEasy Reactive, JWT, and YAML configuration.
-
-=== Configuration Mapping
-The `OAuthConfig` class uses `@ConfigMapping` to bind YAML configuration properties to Java interfaces, making configuration type-safe and flexible.
-
-=== Key Services
-
-* *CookieService*: Manages creation and validation of authentication cookies
-* *InternalJwtValidatorService*: Handles JWT token validation and claim extraction
+== Overview
+This Quarkus application provides OAuth2/OpenID Connect authentication for NGINX, leveraging a stateless cookie-based approach to ensure secure and scalable authentication without relying on server-side sessions.
 
 === REST Endpoints
 
-* */auth/login*: Triggers the OIDC authentication flow
-* */auth/callback*: Handles the return from the IDP, creates the authentication cookie
-* */auth/validate*: Validates the token from the cookie (used by NGINX for auth_request)
-* */auth/logout*: Clears the authentication cookie
-* */auth/discovery*: Provides OIDC discovery information for dynamic client registration
+* */auth/login*: Initiates the OpenID Connect (OIDC) authentication flow.
+* */auth/callback*: Processes the response from the Identity Provider (IDP) and generates the authentication cookie.
+* */auth/validate*: Verifies the token from the authentication cookie (used by NGINX via the `auth_request` directive).
+* */auth/logout*: Deletes the authentication cookie to log the user out.
+* *auth/.well-known/jwks.json*: Supplies OIDC discovery metadata for dynamic client registration.
 
 === NGINX Integration
-The included NGINX configuration uses the `auth_request` directive to validate requests against the `/auth/validate` endpoint and passes the JWT token to backend services.
+
+The provided NGINX configuration leverages the `auth_request` directive to authenticate requests against the `/auth/validate` endpoint. It forwards the validated JWT token to backend services for further processing.
 
 == Provider Compatibility
 

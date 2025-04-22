@@ -158,7 +158,7 @@ public interface OAuthConfig {
         @WithName("map-claims")
         Optional<List<ClaimMapping>> mapClaims();
 
-        @WithName("translate-claim-items")
+        @WithName("claim-mappings")
         Optional<List<TranslateClaimItems>> translateClaimItems();
 
         @WithName("key")
@@ -189,15 +189,20 @@ public interface OAuthConfig {
         @WithName("claim")
         String claimName();
 
-        @WithName("from-values")
-        String fromValues();
-
-        @WithName("to-values")
-        String toValues();
+        @WithName("value-mappings")
+        List<ValueMapping> valueMappings();
 
         @WithName("remove-non-matching")
         @WithDefault("true")
         boolean removeNonMatching();
+    }
+
+    interface ValueMapping {
+        @WithName("from")
+        String from();
+
+        @WithName("to")
+        String to();
     }
 
     interface KeyConfig {

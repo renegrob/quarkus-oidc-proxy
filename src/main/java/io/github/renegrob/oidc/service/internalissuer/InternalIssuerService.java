@@ -53,15 +53,9 @@ public class InternalIssuerService {
             for (OAuthConfig.TranslateClaimItems item : translateClaimItems.get()) {
                 Map<String, String> translations = new HashMap<>();
                 claimTranslations.put(item.claimName(), new ClaimTranslationRule(item.claimName(), translations, item.removeNonMatching()));
-                List<String> fromValues = Arrays.asList(item.fromValues().split("\\s*,\\s*"));
-                List<String> toValues = Arrays.asList(item.toValues().split("\\s*,\\s*"));
-                if (fromValues.size() != toValues.size()) {
-                    throw new IllegalArgumentException(String.format(
-                            "fromValues and toValues must have the same size: %s vs %s", fromValues, toValues));
-                }
-                for (int i = 0; i < fromValues.size(); i++) {
-                    String fromValue = fromValues.get(i);
-                    String toValue = toValues.get(i);
+                for (OAuthConfig.ValueMapping valueMapping : item.valueMappings()) {
+                    String fromValue = valueMapping.from();
+                    String toValue = valueMapping.to();
                     translations.put(fromValue, toValue);
                 }
             }
