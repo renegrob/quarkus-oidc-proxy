@@ -61,11 +61,10 @@ oidc:
            to: MyBackend-Group2
         remove-non-matching: true
     key:
-        key-id:
-        signature-algorithm: ES256
+        key-id: ${OIDC_INTERNAL_ISSUER_KEY_ID}
+        signature-algorithm: ${OIDC_INTERNAL_ISSUER_SIGNATURE_ALGORITHM:ES256}
         private-key: ${OIDC_INTERNAL_ISSUER_PRIVATE_KEY}
-        public-key: |
-          -----BEGIN PUBLIC KEY-----
-          MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEdpwDEycOhFEi9A+sz9NN9lTnPPwP
-          PMUCPl2fCC4p4ly4vvF84eLvyunbKImxErpBb/gIi8dGANd3pVSAkuGZgg==
-          -----END PUBLIC KEY-----
+        public-key: ${OIDC_INTERNAL_ISSUER_PUBLIC_KEY}
+  token:
+    header-name: ${OIDC_TOKEN_HEADER_NAME:Authorization}
+    forwarding-method: ${OIDC_TOKEN_FORWARDING_METHOD:HEADER}
