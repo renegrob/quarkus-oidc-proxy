@@ -161,8 +161,22 @@ public interface OAuthConfig {
         @WithName("claim-mappings")
         Optional<List<TranslateClaimItems>> translateClaimItems();
 
+        @WithName("additional-claims")
+        Optional<List<AdditionalClaim>> additionalClaims();
+
         @WithName("key")
         KeyConfig keyConfig();
+    }
+
+    interface AdditionalClaim {
+        @WithName("name")
+        String name();
+
+        @WithName("value")
+        Optional<String> value();
+
+        @WithName("values")
+        Optional<List<String>> values();
     }
 
     interface ClaimMapping {
@@ -202,7 +216,7 @@ public interface OAuthConfig {
         String from();
 
         @WithName("to")
-        String to();
+        List<String> to();
     }
 
     interface KeyConfig {
