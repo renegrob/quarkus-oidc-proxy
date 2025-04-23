@@ -4,6 +4,8 @@ import io.github.renegrob.oidc.config.ClaimType;
 import io.github.renegrob.oidc.config.FederationMode;
 import io.github.renegrob.oidc.config.OAuthConfig;
 import io.github.renegrob.oidc.service.RandomService;
+import io.github.renegrob.oidc.service.internalissuer.claims.ClaimTranslationFactory;
+import io.github.renegrob.oidc.service.internalissuer.claims.ClaimTranslationRule;
 import io.github.renegrob.oidc.service.jwt.ClaimsMapBuilder;
 import io.github.renegrob.oidc.util.Base64Util;
 import io.smallrye.jwt.build.Jwt;
@@ -38,87 +40,99 @@ public class InternalIssuerService {
     private final Map<String, ClaimTranslationRule> claimTranslations;
 
     @Inject
-    InternalIssuerService(OAuthConfig config, InternalKeyInfo internalKeyInfo, RandomService randomService) {
+    InternalIssuerService(OAuthConfig config, InternalKeyInfo internalKeyInfo, ClaimTranslationFactory claimTranslationFactory, RandomService randomService) {
         this.federationMode = config.federationMode();
         this.issuerConfig = config.internalIssuer();
         this.privateKey = internalKeyInfo.privateKey();
         this.keyId = internalKeyInfo.keyId();
         this.randomService = randomService;
-        this.claimTranslations = createClaimTranslations(config.internalIssuer().translateClaimItems());
-    }
-
-    private Map<String, ClaimTranslationRule> createClaimTranslations(Optional<List<OAuthConfig.TranslateClaimItems>> translateClaimItems) {
-        Map<String, ClaimTranslationRule> claimTranslations = new HashMap<>();
-        if (translateClaimItems.isPresent()) {
-            for (OAuthConfig.TranslateClaimItems item : translateClaimItems.get()) {
-                Map<String, String> translations = new HashMap<>();
-                claimTranslations.put(item.claimName(), new ClaimTranslationRule(item.claimName(), translations, item.removeNonMatching()));
-                for (OAuthConfig.ValueMapping valueMapping : item.valueMappings()) {
-                    String fromValue = valueMapping.from();
-                    String toValue = valueMapping.to();
-                    translations.put(fromValue, toValue);
-                }
-            }
-        }
-        return claimTranslations;
+        this.claimTranslations = claimTranslationFactory.createClaimTranslations();
     }
 
     public String createInternalJwt(JwtClaims source) {
-        if (isPassThrough()) {
+        if (federationMode == FederationMode.PASS_THROUGH) {
             throw new IllegalStateException("Internal issuer is disabled.");
         }
         try {
             ClaimsMapBuilder claims = ClaimsMapBuilder.claims()
                     .subject(source.getSubject())
-                    .issuer(issuerConfig.issuer())
-                    .audience(issuerConfig.audience())
-                    .issuedAt(Instant.now())
-                    .expiresIn(issuerConfig.expiration())
-                    .nonce(generateNonce())
                     .scope(issuerConfig.scope()
                             .map(sc -> Arrays.stream(sc.split(" ")).collect(toSet())).orElse(emptySet()));
 
-            for (String name : issuerConfig.passThroughClaims()) {
-                Object value = source.getClaimValue(name);
-                if (value == null) {
-                    throw new BadRequestException(String.format("Missing claim: %s", name));
-                }
-                claims.claim(name, value);
-            }
-            for (String name : issuerConfig.optionalPassThroughClaims()) {
-                Object value = source.getClaimValue(name);
-                if (value != null) {
-                    claims.claim(name, value);
-                }
-            }
+            processClaims(source, claims);
 
-            for (OAuthConfig.ClaimMapping claimMapping : issuerConfig.mapClaims().orElse(List.of())) {
-                Object value = source.getClaimValue(claimMapping.from());
-                if (value != null) {
-                    claims.claim(claimMapping.to(), mapValue(value, claimMapping));
-                } else {
-                    if (claimMapping.required()) {
-                        throw new BadRequestException(String.format("Missing claim: %s", claimMapping.from()));
-                    }
-                }
-            }
-
-            translateClaims(claims);
+            // These claims cannot be overridden
+            claims.issuer(issuerConfig.issuer())
+                    .audience(issuerConfig.audience())
+                    .issuedAt(Instant.now())
+                    .expiresIn(issuerConfig.expiration())
+                    .nonce(generateNonce());
 
             LOG.info("Internal claims: {}", claims.toMap());
 
             var keyConfig = issuerConfig.keyConfig();
 
-            String signed = Jwt.claims(claims.toMap()).jws()
+            return Jwt.claims(claims.toMap()).jws()
                     .keyId(keyId)
                     .algorithm(keyConfig.signatureAlgorithm())
                     .sign(privateKey);
 
-            return signed;
         } catch (Exception e) {
-
             LOG.error("Failed to create JWT", e);
             throw new RuntimeException("Failed to create internal JWT token", e);
+        }
+    }
+
+    private void processClaims(JwtClaims source, ClaimsMapBuilder claims) {
+        processPassThroughClaims(source, claims);
+        processOptionalPassThroughClaims(source, claims);
+        processMappedClaims(source, claims);
+        translateClaims(claims);
+        addAdditionalClaims(claims);
+    }
+
+    private void processPassThroughClaims(JwtClaims source, ClaimsMapBuilder claims) {
+        for (String name : issuerConfig.passThroughClaims()) {
+            Object value = source.getClaimValue(name);
+            if (value == null) {
+                throw new BadRequestException(String.format("Missing claim: %s", name));
+            }
+            claims.claim(name, value);
+        }
+    }
+
+    private void processOptionalPassThroughClaims(JwtClaims source, ClaimsMapBuilder claims) {
+        for (String name : issuerConfig.optionalPassThroughClaims()) {
+            Object value = source.getClaimValue(name);
+            if (value != null) {
+                claims.claim(name, value);
+            }
+        }
+    }
+
+    private void processMappedClaims(JwtClaims source, ClaimsMapBuilder claims) {
+        for (OAuthConfig.ClaimMapping claimMapping : issuerConfig.mapClaims().orElse(List.of())) {
+            Object value = source.getClaimValue(claimMapping.from());
+            if (value != null) {
+                claims.claim(claimMapping.to(), mapValue(value, claimMapping));
+            } else if (claimMapping.required()) {
+                throw new BadRequestException(String.format("Missing claim: %s", claimMapping.from()));
+            }
+        }
+    }
+
+    private void addAdditionalClaims(ClaimsMapBuilder claims) {
+        for (OAuthConfig.AdditionalClaim additionalClaim : issuerConfig.additionalClaims().orElse(List.of())) {
+            if (claims.get(additionalClaim.name()) == null) {
+                if (additionalClaim.value().isPresent()) {
+                    if (additionalClaim.values().isPresent()) {
+                        throw new BadRequestException("Additional claim can have either value or values, not both");
+                    }
+                    claims.claim(additionalClaim.name(), additionalClaim.value().orElseThrow());
+                } else {
+                    claims.claim(additionalClaim.name(), additionalClaim.values().orElseThrow());
+                }
+            }
         }
     }
 
@@ -139,7 +153,6 @@ public class InternalIssuerService {
             if (value instanceof Collection) {
                 return String.join(claimMapping.separator(),
                         ((Collection<?>) value).stream().map(Object::toString).toList());
-
             } else {
                 return String.valueOf(value);
             }
@@ -178,9 +191,5 @@ public class InternalIssuerService {
 
     private String generateNonce() {
         return Base64Util.toBase64(randomService.randomBytes(32), true);
-    }
-
-    private boolean isPassThrough() {
-        return federationMode == FederationMode.PASS_THROUGH;
     }
 }
