@@ -1,0 +1,7 @@
+= Notes
+
+== Debugging Tips
+
+Use http-https-echo-chart to test the OIDC flow. The chart is available at:
+
+https://github.com/germanattanasio/http-https-echo-chart?tab=readme-ov-file

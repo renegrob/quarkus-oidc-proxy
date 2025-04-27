@@ -1,0 +1,6 @@
+apiVersion: v2
+name: oidc-proxy-cb
+description: A Helm chart for deploying the oidc-proxy-cb application
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

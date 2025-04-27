@@ -3,6 +3,7 @@ package io.github.renegrob.oidc.service.internalissuer;
 import io.github.renegrob.oidc.config.FederationMode;
 import io.github.renegrob.oidc.config.OAuthConfig;
 import io.github.renegrob.oidc.util.HashBuilder;
+import io.github.renegrob.oidc.util.KeyUtil;
 import io.smallrye.jwt.util.KeyUtils;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -33,8 +34,8 @@ public class InternalKeyInfo {
         }
         var keyConfig = config.internalIssuer().keyConfig();
         try {
-            this.publicKey = KeyUtils.decodePublicKey(keyConfig.publicKey(), keyConfig.signatureAlgorithm());
-            this.privateKey = KeyUtils.decodePrivateKey(keyConfig.privateKey(), keyConfig.signatureAlgorithm());
+            this.publicKey = KeyUtils.decodePublicKey(KeyUtil.resolvePublicKey(keyConfig), keyConfig.signatureAlgorithm());
+            this.privateKey = KeyUtils.decodePrivateKey(KeyUtil.resolvePrivateKey(keyConfig), keyConfig.signatureAlgorithm());
         } catch (GeneralSecurityException e) {
             LOG.error("Failed to decode key: {}", e.getMessage(), e);
             throw new RuntimeException(e);

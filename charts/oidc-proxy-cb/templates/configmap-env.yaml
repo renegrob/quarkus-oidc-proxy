@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-env-config
+  labels:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+immutable: true
+data:
+  {{ range $key, $value := .Values.env }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+  {{- with .Values.cookie }}
+  {{- if .name }}COOKIE_NAME: {{ .name | quote }}
+  {{ end }}
+  {{- if .path }}COOKIE_PATH: {{ .path | quote }}
+  {{- end }}
+  COOKIE_DOMAIN: {{ required ".cookie.domain is required." .domain | quote }}
+  {{ if .secure }}COOKIE_SECURE: {{ .secure | quote }}
+  {{ end }}
+  {{- if .httpOnly }}COOKIE_HTTP_ONLY: {{ .httpOnly | quote }}
+  {{ end }}
+  {{- if .sameSite }}COOKIE_SAME_SITE: {{ .sameSite | quote }}
+  {{ end }}
+  {{- if .maxAge }}COOKIE_MAX_AGE: {{ .maxAge | quote }}
+  {{ end }}
+  {{- end }}
+  {{- with .Values.token }}
+  {{- if .headerName }}TOKEN_HEADER_NAME: {{ .headerName | quote }}
+  {{ end }}
+  {{- if .forwardingMethod }}TOKEN_FORWARDING_METHOD: {{ .forwardingMethod | quote }}
+  {{ end }}
+  {{- end }}
+  {{- with .Values.idp }}
+  {{- if .federationMode }}OIDC_FEDERATION_MODE: {{ .federationMode | quote }}
+  {{ end }}
+  {{- if .discoveryEnabled }}OIDC_DISCOVERY_ENABLED: {{ .discoveryEnabled | quote }}
+  {{ end }}
+  {{- if .authServerUrl }}OIDC_AUTH_SERVER_URL: {{ .authServerUrl | quote }}
+  {{ end }}
+  {{- if .tokenPath }}OIDC_TOKEN_PATH: {{ .tokenPath | quote }}
+  {{ end }}
+  {{- if .userinfoUrl }}OIDC_USERINFO_URL: {{ .userinfoUrl | quote }}
+  {{ end }}
+  {{- if .jwksPath }}OIDC_JWKS_PATH: {{ .jwksPath | quote }}
+  {{ end }}
+  {{- if .logoutUrl }}OIDC_LOGOUT_URL: {{ .logoutUrl | quote }}
+  {{ end }}
+  {{- if .issuer }}OIDC_ISSUER: {{ .issuer | quote }}
+  {{ end }}
+  {{- if .responseType }}OIDC_RESPONSE_TYPE: {{ .responseType | quote }}
+  {{ end }}
+  {{- if .responseMode }}OIDC_RESPONSE_MODE: {{ .responseMode | quote }}
+  {{ end }}
+  {{- if .audience }}OIDC_AUDIENCE: {{ .audience | quote }}
+  {{- end }}
+  {{- with .client }}
+  OIDC_REDIRECT_URL: {{ required ".idp.client.redirectUrl is required." .redirectUrl | quote }}
+  {{ if .scope }}OIDC_SCOPE: {{ .scope | quote }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
+  {{- with .Values.internalIssuer }}
+  OIDC_INTERNAL_ISSUER: {{ required ".Values.internalIssuer.issuer is required." .issuer | quote }}
+  {{ if .audience }}INTERNAL_AUDIENCE: {{ .audience | quote }}
+  {{ end }}
+  {{- if .expiration }}INTERNAL_EXPIRATION: {{ .expiration | quote }}
+  {{ end }}
+  {{- if .scope }}INTERNAL_SCOPE: {{ .scope | quote }}
+  {{ end }}
+  {{- end }}

@@ -50,6 +50,6 @@ public class GrantRequestVerificationService {
     }
 
     private String createStateHash(String state) {
-        return HashBuilder.sha512(config.stateSecret()).update(state).toBase64(true);
+        return HashBuilder.sha512(config.provider().client().stateSecret()).update(state).toBase64(true);
     }
 }

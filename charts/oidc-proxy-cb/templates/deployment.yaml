@@ -1,0 +1,132 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}
+  labels:
+    app: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+    spec:
+      {{- if .Values.debugConfig }}
+      initContainers:
+        - name: print-config
+          image: alpine/git  # Using alpine/git as it's a small image with common tools
+          command: [ "/bin/sh", "-c" ]
+          args: [ "env && echo '---' && cat /deployments/config/application.yaml && cat /run/secrets/key/public-key.pem && sleep 3m" ]
+          restartPolicy: Always # Keep the init container running for debugging
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-env-config
+          env:
+            - name: OIDC_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-client-secret
+                  key: OIDC_CLIENT_ID
+            - name: OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-client-secret
+                  key: OIDC_CLIENT_SECRET
+            - name: OIDC_CLIENT_STATE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-client-secret
+                  key: OIDC_CLIENT_STATE_SECRET
+            - name: OIDC_INTERNAL_ISSUER_PRIVATE_KEY_LOCATION
+              value: /run/secrets/key/private-key.pem
+            - name: OIDC_INTERNAL_ISSUER_PUBLIC_KEY_LOCATION
+              value: /run/secrets/key/public-key.pem
+          volumeMounts:
+            - name: config-file
+              mountPath: /deployments/config/application.yaml
+              subPath: application.yaml
+            - name: issuer-keys
+              mountPath: /run/secrets/key
+              readOnly: true
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+          - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-env-config
+          env:
+            - name: OIDC_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-client-secret
+                  key: OIDC_CLIENT_ID
+            - name: OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-client-secret
+                  key: OIDC_CLIENT_SECRET
+            - name: OIDC_CLIENT_STATE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-client-secret
+                  key: OIDC_CLIENT_STATE_SECRET
+            - name: OIDC_INTERNAL_ISSUER_PRIVATE_KEY_LOCATION
+              value: /run/secrets/key/private-key.pem
+            - name: OIDC_INTERNAL_ISSUER_PUBLIC_KEY_LOCATION
+              value: /run/secrets/key/public-key.pem
+          resources:
+            limits:
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.startupProbe.path }}
+              port: {{ .Values.startupProbe.port }}
+            failureThreshold: {{ .Values.startupProbe.failureThreshold }}
+            periodSeconds: {{ .Values.startupProbe.periodSeconds }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.readinessProbe.path }}
+              port: {{ .Values.readinessProbe.port }}
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.livenessProbe.path }}
+              port: {{ .Values.livenessProbe.port }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          volumeMounts:
+            - name: config-file
+              mountPath: /deployments/config/application.yaml
+              subPath: application.yaml
+            - name: issuer-keys
+              mountPath: /run/secrets/key
+              readOnly: true
+      volumes:
+        - name: config-file
+          configMap:
+            name: {{ .Release.Name }}-file-config
+        - name: issuer-keys
+          secret:
+            secretName: {{ .Release.Name }}-issuer-keys
+            items:
+              - key: private-key.pem
+                path: private-key.pem
+                mode: 0400  # Read-only for owner
+              - key: public-key.pem
+                path: public-key.pem
+                mode: 0444  # Read-only for all
