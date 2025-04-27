@@ -1,0 +1,98 @@
+replicaCount: 1
+
+image:
+  repository: renegrob/oidc-proxy-cb
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+resources:
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+  requests:
+    cpu: "200m"
+    memory: "256Mi"
+
+startupProbe:
+  path: /q/health/started
+  port: 8080
+  failureThreshold: 30
+  periodSeconds: 10
+
+readinessProbe:
+  path: /q/health/ready
+  port: 8080
+  initialDelaySeconds: 10
+  periodSeconds: 5
+
+livenessProbe:
+  path: /q/health/live
+  port: 8080
+  initialDelaySeconds: 20
+  periodSeconds: 15
+
+debugConfig: false
+
+env:
+
+cookie:
+  name: AUTH_TOKEN
+  path: /
+  domain:
+  secure: true
+  httpOnly: true
+  sameSite: Lax
+  maxAge: 24h
+
+token:
+  headerName: X-Auth-Token
+  forwardingMethod: HEADER
+
+idp:
+  federationMode: FEDERATE_FROM_ID_TOKEN
+  discoveryEnabled: true
+  authServerUrl:
+  authorizationPath: /oauth2/v2.0/authorize
+  logoutUrl: /oauth2/v2.0/logout
+  tokenPath: /oauth2/v2.0/token
+  issuer:
+  audience:
+  jwksPath: /discovery/v2.0/keys
+  userinfoUrl:
+  client:
+    clientId:
+    clientSecret:
+    scope: openid profile email
+    redirectUri:
+    stateSecret:
+
+internalIssuer:
+  issuer:
+  audience:
+  token-expiration: 1h
+  scope: openid profile email
+  key:
+    keyId:
+    privateKey: |
+      -----BEGIN PRIVATE KEY-----
+      MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSj...
+      -----END PRIVATE KEY-----
+    publicKey: |
+      -----BEGIN PUBLIC KEY-----
+      MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC...
+      -----END PUBLIC KEY-----
+  claims:
+    passThroughClaims: roles,email,name
+    additionalClaims:
+    claimMappings:
+
+ingress:
+  enabled: false
+  host:
+  backendService:
+    name:
+    port:

@@ -19,10 +19,9 @@ quarkus:
     level: INFO
     category:
       "io.github.renegrob.oidc":
-        level: DEBUG
+        level: ${OIDC_LOG_LEVEL:DEBUG}
 
 oidc:
-  state-secret: ${STATE_SECRET}
   cookie:
     name: ${COOKIE_NAME:AUTH_TOKEN}
     path: ${COOKIE_PATH:/}
@@ -42,34 +41,26 @@ oidc:
     jwks-path: ${OIDC_JWKS_PATH:}
     userinfo-path: ${OIDC_USERINFO_PATH:}
     end-session-path: ${OIDC_END_SESSION_PATH:}
-    issuer: ${OIDC_ISSUER:}
+    issuer: ${OIDC_ISSUER}
     audience: ${OIDC_AUDIENCE:}
     client:
       client-id: ${OIDC_CLIENT_ID}
       client-secret: ${OIDC_CLIENT_SECRET}
       scope: ${OIDC_SCOPE:openid profile email}
       redirect-uri: ${OIDC_REDIRECT_URL}
+      state-secret: ${OIDC_CLIENT_STATE_SECRET}
   internal-issuer:
     issuer: ${OIDC_INTERNAL_ISSUER:}
     pass-through-claims: ${OIDC_PASS_THROUGH_CLAIMS:roles,email,given_name,family_name,name}
-    additional-claims:
-      - name: tenant
-        value: my-tenant
-    claim-mappings:
-      - claim: roles
-        remove-non-matching: true
-        value-mappings:
-         - from: bcecbcf7-e7f1-4896-a006-e120ebeb2b7c
-           to: MyBackend-Group1
-         - from: e3ac9c51-3af6-4ab8-8465-a181fe83f592
-           to:
-              - MyBackend-Group2
-              - users
     key:
         key-id: ${OIDC_INTERNAL_ISSUER_KEY_ID}
         signature-algorithm: ${OIDC_INTERNAL_ISSUER_SIGNATURE_ALGORITHM:ES256}
-        private-key: ${OIDC_INTERNAL_ISSUER_PRIVATE_KEY}
-        public-key: ${OIDC_INTERNAL_ISSUER_PUBLIC_KEY}
+        private-key:
+           ~: ${OIDC_INTERNAL_ISSUER_PRIVATE_KEY}
+           location: ${OIDC_INTERNAL_ISSUER_PRIVATE_KEY_LOCATION:/run/secrets/key/private-key.pem}
+        public-key:
+           ~: ${OIDC_INTERNAL_ISSUER_PUBLIC_KEY}
+           location: ${OIDC_INTERNAL_ISSUER_PUBLIC_KEY_LOCATION:/run/secrets/key/public-key.pem}
   token:
     header-name: ${OIDC_TOKEN_HEADER_NAME:Authorization}
     forwarding-method: ${OIDC_TOKEN_FORWARDING_METHOD:HEADER}

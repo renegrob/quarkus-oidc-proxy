@@ -1,0 +1,28 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-ingress
+  labels:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    nginx.ingress.kubernetes.io/auth-url: "http://{{ .Release.Name }}.{{ .Values.ingress.namespace }}/auth/validate"
+    nginx.ingress.kubernetes.io/auth-signin: "http://{{ .Values.ingress.externalDomain }}/auth/login?redirect=$request_uri"
+    nginx.ingress.kubernetes.io/proxy-set-headers: "oidc-proxy-cb-headers"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header X-Auth-Token $http_x_auth_token;
+spec:
+  rules:
+  - host: {{ .Values.ingress.host }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.ingress.backendService.name }}
+            port:
+              number: {{ .Values.ingress.backendService.port }}
+{{- end }}

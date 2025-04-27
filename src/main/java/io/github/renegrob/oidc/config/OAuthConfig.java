@@ -31,9 +31,6 @@ public interface OAuthConfig {
     @WithName("internal-issuer")
     InternalIssuerConfig internalIssuer();
 
-    @WithName("state-secret")
-    String stateSecret();
-
     interface CookieConfig {
         @WithName("name")
         @WithDefault("AUTH_TOKEN")
@@ -130,6 +127,9 @@ public interface OAuthConfig {
 
         @WithName("scope")
         Optional<String> scope();
+
+        @WithName("state-secret")
+        String stateSecret();
     }
 
     interface InternalIssuerConfig {
@@ -228,9 +228,15 @@ public interface OAuthConfig {
         SignatureAlgorithm signatureAlgorithm();
 
         @WithName("private-key")
-        String privateKey();
+        Optional<String> privateKey();
+
+        @WithName("private-key.location")
+        Optional<String> privateKeyLocation();
 
         @WithName("public-key")
-        String publicKey();
+        Optional<String> publicKey();
+
+        @WithName("public-key.location")
+        Optional<String> publicKeyLocation();
     }
 }
