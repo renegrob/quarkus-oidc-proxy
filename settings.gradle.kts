@@ -11,5 +11,5 @@ pluginManagement {
     }
 }
 
-rootProject.name = "oidc-proxy-cb"
+rootProject.name = "oidc-proxy"
 

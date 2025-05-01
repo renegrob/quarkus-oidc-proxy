@@ -8,9 +8,12 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
   annotations:
-    nginx.ingress.kubernetes.io/auth-url: "http://{{ .Release.Name }}.{{ .Values.ingress.namespace }}/auth/validate"
-    nginx.ingress.kubernetes.io/auth-signin: "http://{{ .Values.ingress.externalDomain }}/auth/login?redirect=$request_uri"
-    nginx.ingress.kubernetes.io/proxy-set-headers: "oidc-proxy-cb-headers"
+    nginx.ingress.kubernetes.io/auth-signin: "{{ default "" .Values.ingress.externalDomain }}/auth/login"
+    nginx.ingress.kubernetes.io/auth-url: "http://{{ default .Values.ingress.host .Values.ingress.externalDomain }}/auth/validate"
+    nginx.ingress.kubernetes.io/proxy-set-headers: "X-Auth-Token"
+    nginx.ingress.kubernetes.io/auth-response-headers: "X-Auth-Token"
+    nginx.ingress.kubernetes.io/auth-keepalive: "5"
+    nginx.ingress.kubernetes.io/auth-cache-key: {{ .Values.ingress.backendService.name }}
     nginx.ingress.kubernetes.io/configuration-snippet: |
       proxy_set_header X-Auth-Token $http_x_auth_token;
 spec:
