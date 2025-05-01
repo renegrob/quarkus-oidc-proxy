@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: renegrob/oidc-proxy-cb
+  repository: renegrob/oidc-proxy
   tag: latest
   pullPolicy: IfNotPresent
 
@@ -36,6 +36,9 @@ livenessProbe:
   periodSeconds: 15
 
 debugConfig: false
+
+logLevel:
+  oidc: DEBUG
 
 env:
 

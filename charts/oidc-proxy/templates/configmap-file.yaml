@@ -6,12 +6,16 @@ metadata:
   labels:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-immutable: true
 data:
   application.yaml: |
     quarkus:
       http:
-        port: 8080    
+        port: 8080
+      log:
+        level: {{ default "INFO" .Values.logLevel.quarkus }}
+        category:
+          "io.github.renegrob.oidc":
+            level: {{ default "INFO" .Values.logLevel.oidc }}  
     oidc:
       internal-issuer:
         additional-claims:

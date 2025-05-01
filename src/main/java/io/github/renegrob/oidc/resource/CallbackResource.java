@@ -94,6 +94,7 @@ public class CallbackResource {
         }
 
         NewCookie cookie = cookieService.createAuthCookie(internalToken);
+        LOG.debug("Setting cookie: {}", cookie);
 
         return Response.ok(String.format(
                         """

@@ -41,7 +41,6 @@ public interface OAuthConfig {
         String path();
 
         @WithName("domain")
-        @WithDefault("localhost") // TODO: remove
         String domain();
 
         @WithName("secure")

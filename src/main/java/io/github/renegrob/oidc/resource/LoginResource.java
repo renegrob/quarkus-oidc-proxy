@@ -9,11 +9,15 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 
 @Path("/auth/login")
 public class LoginResource {
+
+    private static final Logger LOG = LoggerFactory.getLogger(LoginResource.class);
 
     @Inject
     IdpConfiguration config;
@@ -35,6 +39,7 @@ public class LoginResource {
                 .queryParam("scope", config.scope())
                 .queryParam("state", validationData.state())
                 .build();
+        LOG.debug("Setting cookie: {}", validationData.cookie());
         return Response.seeOther(redirectUri).cookie(validationData.cookie()).build();
     }
 }
