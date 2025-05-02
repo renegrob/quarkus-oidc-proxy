@@ -11,6 +11,8 @@ import jakarta.ws.rs.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
+
 import static io.github.renegrob.oidc.constants.CookieNames.OAUTH_STATE;
 
 @Singleton
@@ -29,8 +31,9 @@ public class GrantRequestVerificationService {
         this.cookieService = cookieService;
     }
 
-    public GrantRequestValidationData createStateCookie() {
-        String state = Base64Util.toBase64(randomService.randomBytes(32), true);
+    public GrantRequestValidationData createStateCookie(String requestUri) {
+        String state = Base64Util.toBase64(randomService.randomBytes(32), true)
+                + (requestUri != null ? ":" + requestUri : "");
         var stateHash = createStateHash(state);
         return new GrantRequestValidationData(state, cookieService.createSessionCookie(OAUTH_STATE, stateHash));
     }
@@ -47,6 +50,16 @@ public class GrantRequestVerificationService {
         if (!stateHash.equals(cookieState)) {
             throw new BadRequestException("State mismatch");
         }
+    }
+
+    public static URI extractRequestUri(String state) {
+        if (state != null) {
+            String[] parts = state.split(":", 2);
+            if (parts.length == 2) {
+                return URI.create(parts[1]);
+            }
+        }
+        return URI.create("/");
     }
 
     private String createStateHash(String state) {
