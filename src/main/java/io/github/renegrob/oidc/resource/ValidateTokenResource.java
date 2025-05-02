@@ -36,7 +36,7 @@ public class ValidateTokenResource {
 
 
     @GET
-    public RestResponse<Void> validate(@RestCookie("AUTH_TOKEN") String token) {
+    public RestResponse<String> validate(@RestCookie("AUTH_TOKEN") String token) {
         if (token == null || token.isEmpty()) {
             LOG.debug("No auth token found in cookie");
             return RestResponse.status(Response.Status.UNAUTHORIZED);
@@ -48,8 +48,11 @@ public class ValidateTokenResource {
         if (tokenIsValid) {
             LOG.debug("Token is valid");
             String headerName = config.token().forwardingMethod() == BEARER ? HttpHeaders.AUTHORIZATION : config.token().headerName();
-            String headerValue = (config.token().forwardingMethod() == BEARER ? "Bearer " : "") + token;
-            RestResponse.ResponseBuilder<Void> responseBuilder = RestResponse.ResponseBuilder.<Void>ok()
+            String headerPrefix = config.token().forwardingMethod() == BEARER ? "Bearer " : "";
+            String headerValue = headerPrefix + token;
+            LOG.debug("Setting header: {}: {}<JWT-Token>", headerName, headerPrefix);
+            RestResponse.ResponseBuilder<String> responseBuilder = RestResponse.ResponseBuilder
+                    .ok("Token is valid")
                     .header(headerName, headerValue);
             return responseBuilder.build();
         } else {

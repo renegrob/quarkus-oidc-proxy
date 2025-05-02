@@ -61,6 +61,3 @@ oidc:
         public-key:
            ~: ${OIDC_INTERNAL_ISSUER_PUBLIC_KEY}
            location: ${OIDC_INTERNAL_ISSUER_PUBLIC_KEY_LOCATION:/run/secrets/key/public-key.pem}
-  token:
-    header-name: ${OIDC_TOKEN_HEADER_NAME:Authorization}
-    forwarding-method: ${OIDC_TOKEN_FORWARDING_METHOD:HEADER}

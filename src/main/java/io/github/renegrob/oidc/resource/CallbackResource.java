@@ -21,6 +21,7 @@ import org.jose4j.jwt.consumer.JwtContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
 import java.util.Set;
 
 import static io.github.renegrob.oidc.constants.CookieNames.OAUTH_STATE;
@@ -33,6 +34,8 @@ public class CallbackResource {
     private static final Logger LOG = LoggerFactory.getLogger(CallbackResource.class);
 
     private final DefaultJWTTokenParser jwtTokenParser = new DefaultJWTTokenParser();
+
+    private boolean debug = false;
 
     @Inject
     OAuthConfig config;
@@ -64,6 +67,7 @@ public class CallbackResource {
             return Response.status(Response.Status.BAD_REQUEST).entity("Missing code").build();
         }
         grantRequestVerificationService.verifyState(state, cookieState);
+        URI requestUri = GrantRequestVerificationService.extractRequestUri(state);
 
         JsonObject tokenResponse = tokenService.exchangeCodeForToken(code);
         String idToken = tokenResponse.getString("id_token");
@@ -96,22 +100,25 @@ public class CallbackResource {
         NewCookie cookie = cookieService.createAuthCookie(internalToken);
         LOG.debug("Setting cookie: {}", cookie);
 
-        return Response.ok(String.format(
-                        """
-                        Logged in as %s!
-                        
-                        claims:
-                        %s
-                        
-                        access_token:
-                        %s
-                        
-                        external_id_token:
-                        %s
-                        
-                        internal_id_token:
-                        %s
-                        """,
-                claims.getClaimValue("email"), claims, accessToken, idToken, internalToken)).cookie(cookie).build();
+        if (debug) {
+            return Response.ok(String.format(
+                    """
+                    Logged in as %s!
+                    
+                    claims:
+                    %s
+                    
+                    access_token:
+                    %s
+                    
+                    external_id_token:
+                    %s
+                    
+                    internal_id_token:
+                    %s
+                    """,
+                    claims.getClaimValue("email"), claims, accessToken, idToken, internalToken)).cookie(cookie).build();
+        }
+        return Response.seeOther(requestUri).cookie(cookie).build();
     }
 }

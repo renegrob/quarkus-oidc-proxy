@@ -8,14 +8,13 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
   annotations:
-    nginx.ingress.kubernetes.io/auth-signin: "{{ default "" .Values.ingress.externalDomain }}/auth/login"
+    # Check if user is authenticated (HTTP 2xx or HTTP 401 otherwise -> user will be sent to auth-signin, 403 means not authorized)
     nginx.ingress.kubernetes.io/auth-url: "http://{{ default .Values.ingress.host .Values.ingress.externalDomain }}/auth/validate"
-    nginx.ingress.kubernetes.io/proxy-set-headers: "X-Auth-Token"
-    nginx.ingress.kubernetes.io/auth-response-headers: "X-Auth-Token"
+    # auth-response-headers specify headers to pass to backend once authentication request completes.
+    nginx.ingress.kubernetes.io/auth-response-headers: "X-Auth-Token,Authorization"
+    # auth-signin specifies the URL to redirect to when authentication is required.
+    nginx.ingress.kubernetes.io/auth-signin: "{{ default "" .Values.ingress.externalDomain }}/auth/login"
     nginx.ingress.kubernetes.io/auth-keepalive: "5"
-    nginx.ingress.kubernetes.io/auth-cache-key: {{ .Values.ingress.backendService.name }}
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      proxy_set_header X-Auth-Token $http_x_auth_token;
 spec:
   rules:
   - host: {{ .Values.ingress.host }}

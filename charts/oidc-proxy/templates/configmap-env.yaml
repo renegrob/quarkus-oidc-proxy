@@ -26,9 +26,9 @@ data:
   {{ end }}
   {{- end }}
   {{- with .Values.token }}
-  {{- if .headerName }}TOKEN_HEADER_NAME: {{ .headerName | quote }}
+  {{- if .headerName }}OIDC_TOKEN_HEADER_NAME: {{ .headerName | quote }}
   {{ end }}
-  {{- if .forwardingMethod }}TOKEN_FORWARDING_METHOD: {{ .forwardingMethod | quote }}
+  {{- if .forwardingMethod }}OIDC_TOKEN_FORWARDING_METHOD: {{ .forwardingMethod | quote }}
   {{ end }}
   {{- end }}
   {{- with .Values.idp }}

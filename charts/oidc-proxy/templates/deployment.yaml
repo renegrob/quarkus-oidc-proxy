@@ -17,6 +17,8 @@ spec:
       labels:
         app: {{ .Chart.Name }}
     spec:
+      securityContext:
+        fsGroup: 185
       {{- if .Values.debugConfig }}
       initContainers:
         - name: print-config
@@ -123,10 +125,9 @@ spec:
         - name: issuer-keys
           secret:
             secretName: {{ .Release.Name }}-issuer-keys
+            defaultMode: 0440  # Read for owner and group
             items:
               - key: private-key.pem
                 path: private-key.pem
-                mode: 0400  # Read-only for owner
               - key: public-key.pem
                 path: public-key.pem
-                mode: 0444  # Read-only for all
