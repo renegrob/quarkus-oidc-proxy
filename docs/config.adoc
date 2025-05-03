@@ -1,0 +1,119 @@
+= OAuth Configuration
+
+== Federation Mode Config
+
+[cols="a,a,2a,a,a", options="header"]
+|===
+| Property Name | Environment Variable | Description | Type | Default Value
+| `oidc.federation-mode` | `OIDC_FEDERATION_MODE` | `FEDERATE_FROM_ID_TOKEN`, `FEDERATE_FROM_ACCESS_TOKEN` or `PASS_THROUGH` | `FederationMode` | `FEDERATE_FROM_ID_TOKEN`
+|===
+
+== Cookie Config
+
+[cols="a,a,2a,a,a", options="header"]
+|===
+| Property Name | Environment Variable | Description | Type | Default Value
+| `oidc.cookie.name` | `OIDC_COOKIE_NAME` | The name of the cookie used for authentication. | `String` | `AUTH_TOKEN`
+| `oidc.cookie.path` | `OIDC_COOKIE_PATH` | The path for which the cookie is valid. | `String` | `/`
+| `oidc.cookie.domain` | `OIDC_COOKIE_DOMAIN` | The domain for which the cookie is valid. | `String` | *(required)*
+| `oidc.cookie.secure` | `OIDC_COOKIE_SECURE` | Whether the cookie is secure. | `boolean` | `true`
+| `oidc.cookie.http-only` | `OIDC_COOKIE_HTTP_ONLY` | Whether the cookie is HTTP-only. | `boolean` | `true`
+| `oidc.cookie.same-site` | `OIDC_COOKIE_SAME_SITE` | The SameSite attribute for the cookie. | `NewCookie.SameSite` | `Lax`
+| `oidc.cookie.max-age` | `OIDC_COOKIE_MAX_AGE` | The maximum age of the cookie. | `Duration` | `24h`
+|===
+
+== Token Propagation Config
+
+[cols="a,a,2a,a,a", options="header"]
+|===
+| Property Name | Environment Variable | Description | Type | Default Value
+| `oidc.token.header-name` | `OIDC_TOKEN_HEADER_NAME` | The name of the header used for token propagation. | `String` | `X-Auth-Token`
+| `oidc.token.forwarding-method` | `OIDC_TOKEN_FORWARDING_METHOD` | The method used for token forwarding (e.g., HEADER or BEARER). | `TokenForwardingMethod` | `HEADER`
+|===
+
+== Federated Provider OIDC Config
+
+[cols="a,a,2a,a,a", options="header"]
+|===
+| Property Name | Environment Variable | Description | Type | Default Value
+| `oidc.federated-idp.discovery-url` | `OIDC_FEDERATED_IDP_DISCOVERY_URL` | The URL for OIDC discovery. | `Optional<String>` | *(none)*
+| `oidc.federated-idp.discovery-enabled` | `OIDC_FEDERATED_IDP_DISCOVERY_ENABLED` | Whether OIDC discovery is enabled. | `boolean` | `true`
+| `oidc.federated-idp.discovery-path` | `OIDC_FEDERATED_IDP_DISCOVERY_PATH` | The path for OIDC discovery. | `String` | `.well-known/openid-configuration`
+| `oidc.federated-idp.auth-server-url` | `OIDC_FEDERATED_IDP_AUTH_SERVER_URL` | The URL of the OIDC authentication server. | `URI` | *(required)*
+| `oidc.federated-idp.token-path` | `OIDC_FEDERATED_IDP_TOKEN_PATH` | The path for obtaining tokens. | `Optional<String>` | *(none)*
+| `oidc.federated-idp.authorization-path` | `OIDC_FEDERATED_IDP_AUTHORIZATION_PATH` | The path for authorization. | `Optional<String>` | *(none)*
+| `oidc.federated-idp.jwks-path` | `OIDC_FEDERATED_IDP_JWKS_PATH` | The path for JSON Web Key Sets (JWKS). | `Optional<String>` | *(none)*
+| `oidc.federated-idp.userinfo-path` | `OIDC_FEDERATED_IDP_USERINFO_PATH` | The path for user information. | `Optional<String>` | *(none)*
+| `oidc.federated-idp.end-session-path` | `OIDC_FEDERATED_IDP_END_SESSION_PATH` | The path for ending sessions. | `Optional<String>` | *(none)*
+| `oidc.federated-idp.issuer` | `OIDC_FEDERATED_IDP_ISSUER` | The issuer of the OIDC tokens. | `Optional<String>` | *(none)*
+| `oidc.federated-idp.audience` | `OIDC_FEDERATED_IDP_AUDIENCE` | The audience for the OIDC tokens. | `Optional<Set<String>>` | *(none)*
+|===
+
+== Federated Provider OIDC Client Config
+
+[cols="a,a,2a,a,a", options="header"]
+|===
+| Property Name | Environment Variable | Description | Type | Default Value
+| `oidc.federated-idp.client.id` | `OIDC_FEDERATED_IDP_CLIENT_ID` | The client ID for the OIDC provider. | `String` | *(required)*
+| `oidc.federated-idp.client.secret` | `OIDC_FEDERATED_IDP_CLIENT_SECRET` | The client secret for the OIDC provider. | `String` | *(required)*
+| `oidc.federated-idp.client.redirect-uri` | `OIDC_FEDERATED_IDP_CLIENT_REDIRECT_URI` | The redirect URI for the OIDC provider. | `URI` | *(required)*
+| `oidc.federated-idp.client.scope` | `OIDC_FEDERATED_IDP_CLIENT_SCOPE` | The scope for the OIDC provider. | `Optional<String>` | *(none)*
+| `oidc.federated-idp.client.state-secret` | `OIDC_FEDERATED_IDP_CLIENT_STATE_SECRET` | Secret used to secure the state parameter in OIDC flows. Use a strong random value.. | `String` | *(required)*
+|===
+
+== Internal-Issuer Config
+
+[cols="a,a,2a,a,a", options="header"]
+|===
+| Property Name | Environment Variable | Description | Type | Default Value
+| `oidc.internal-issuer.issuer` | `OIDC_INTERNAL_ISSUER_ISSUER` | The issuer for internal tokens. | `String` | *(required)*
+| `oidc.internal-issuer.audience` | `OIDC_INTERNAL_ISSUER_AUDIENCE` | The audience for internal tokens. | `String` | `oauth2-proxy`
+| `oidc.internal-issuer.expiration` | `OIDC_INTERNAL_ISSUER_EXPIRATION` | The expiration time for internal tokens. | `Duration` | `8h`
+| `oidc.internal-issuer.scope` | `OIDC_INTERNAL_ISSUER_SCOPE` | The scope for internal tokens. | `Optional<String>` | *(none)*
+| `oidc.internal-issuer.pass-through-claims` | `OIDC_INTERNAL_ISSUER_PASS_THROUGH_CLAIMS` | List of claims to pass through. | `List<String>` | `email`
+| `oidc.internal-issuer.optional-pass-through-claims` | `OIDC_INTERNAL_ISSUER_OPTIONAL_PASS_THROUGH_CLAIMS` | Optional claims to pass through in internal tokens. | `List<String>` | `family_name,given_name`
+| `oidc.internal-issuer.map-claims` | `OIDC_INTERNAL_ISSUER_MAP_CLAIMS` | Claims to map in internal tokens. | `Optional<List<ClaimMapping>>` | *(none)*
+| `oidc.internal-issuer.claim-mappings` | `OIDC_INTERNAL_ISSUER_CLAIM_MAPPINGS` | Claim mappings for internal tokens. | `Optional<List<TranslateClaimItems>>` | *(none)*
+| `oidc.internal-issuer.additional-claims` | `OIDC_INTERNAL_ISSUER_ADDITIONAL_CLAIMS` | Additional claims for internal tokens. | `Optional<List<AdditionalClaim>>` | *(none)*
+| `oidc.internal-issuer.keys.key-id` | `OIDC_INTERNAL_ISSUER_KEYS_KEY_ID` | The key ID for signing internal tokens. | `Optional<String>` | *(none)*
+| `oidc.internal-issuer.keys.signature-algorithm` | `OIDC_INTERNAL_ISSUER_KEYS_SIGNATURE_ALGORITHM` | The signature algorithm for internal tokens. | `SignatureAlgorithm` | `ES256`
+| `oidc.internal-issuer.keys.private-key` | `OIDC_INTERNAL_ISSUER_KEYS_PRIVATE_KEY` | The private key for signing internal tokens. | `Optional<String>` | *(none)*
+| `oidc.internal-issuer.keys.private-key.location` | `OIDC_INTERNAL_ISSUER_KEYS_PRIVATE_KEY_LOCATION` | The location of the private key for signing internal tokens. | `Optional<String>` | *(none)*
+| `oidc.internal-issuer.keys.public-key` | `OIDC_INTERNAL_ISSUER_KEYS_PUBLIC_KEY` | The public key for verifying internal tokens. | `Optional<String>` | *(none)*
+| `oidc.internal-issuer.keys.public-key.location` | `OIDC_INTERNAL_ISSUER_KEYS_PUBLIC_KEY_LOCATION` | The location of the public key for verifying internal tokens. | `Optional<String>` | *(none)*
+|===s
+
+== Additional Claim Config
+
+[cols="a,a,2a,a,a", options="header"]
+|===
+| Property Name | Environment Variable | Description | Type | Default Value
+| `oidc.internal-issuer.additional-claims[].name` | `OIDC_INTERNAL_ISSUER_ADDITIONAL_CLAIMS_0_NAME` | The name of the additional claim. | `String` | *(required)*
+| `oidc.internal-issuer.additional-claims[].value` | `OIDC_INTERNAL_ISSUER_ADDITIONAL_CLAIMS_0_VALUE` | The value of the additional claim. | `Optional<String>` | *(none)*
+| `oidc.internal-issuer.additional-claims[].values` | `OIDC_INTERNAL_ISSUER_ADDITIONAL_CLAIMS_0_VALUES` | A list of values for the additional claim. | `Optional<List<String>>` | *(none)*
+|===
+
+== Claim Mapping Config
+
+[cols="a,a,2a,a,a", options="header"]
+|===
+| Property Name | Environment Variable | Description | Type | Default Value
+| `oidc.internal-issuer.map-claims[].from` | `OIDC_INTERNAL_ISSUER_MAP_CLAIMS_0_FROM` | The source claim name to map from. | `String` | *(required)*
+| `oidc.internal-issuer.map-claims[].to` | `OIDC_INTERNAL_ISSUER_MAP_CLAIMS_0_TO` | The target claim name to map to. | `String` | *(required)*
+| `oidc.internal-issuer.map-claims[].required` | `OIDC_INTERNAL_ISSUER_MAP_CLAIMS_0_REQUIRED` | Whether the claim is required. | `boolean` | `false`
+| `oidc.internal-issuer.map-claims[].separator` | `OIDC_INTERNAL_ISSUER_MAP_CLAIMS_0_SEPARATOR` | The separator for multi-value claims. | `String` | `,`
+| `oidc.internal-issuer.map-claims[].target-type` | `OIDC_INTERNAL_ISSUER_MAP_CLAIMS_0_TARGET_TYPE` | The target type of the claim (e.g., `string`, `number`). | `ClaimType` | `string`
+|===
+
+== Translate Claim Items Config
+
+Clam-Mappings are applied after the claims have been mapped and are used to translate their values.
+
+[cols="a,a,2a,a,a", options="header"]
+|===
+| Property Name | Environment Variable | Description | Type | Default Value
+| `oidc.internal-issuer.claim-mappings[].claim` | `OIDC_INTERNAL_ISSUER_CLAIM_MAPPINGS_0_CLAIM` | The name of the claim to translate. | `String` | *(required)*
+| `oidc.internal-issuer.claim-mappings[].value-mappings[].from` | `OIDC_INTERNAL_ISSUER_CLAIM_MAPPINGS_0_VALUE_MAPPINGS_0_FROM` | The source value to map from. | `String` | *(required)*
+| `oidc.internal-issuer.claim-mappings[].value-mappings[].to` | `OIDC_INTERNAL_ISSUER_CLAIM_MAPPINGS_0_VALUE_MAPPINGS_0_TO` | The target values to map to. | `List<String>` | *(required)*
+| `oidc.internal-issuer.claim-mappings[].remove-non-matching` | `OIDC_INTERNAL_ISSUER_CLAIM_MAPPINGS_0_REMOVE_NON_MATCHING` | Whether to remove non-matching values. | `boolean` | `true`
+|===

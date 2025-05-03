@@ -103,7 +103,7 @@ public class DiscoveryService {
             return baseUrl + "/" + config.provider().discoveryPath();
         }
         
-        // If there's already a path, ensure discovery path is correctly appended
+        // If there's already a path, ensure the discovery path is correctly appended
         return baseUrl + (path.endsWith("/") ? "" : "/") + config.provider().discoveryPath();
     }
 

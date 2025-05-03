@@ -67,8 +67,8 @@ idp:
   jwksPath: /discovery/v2.0/keys
   userinfoUrl:
   client:
-    clientId:
-    clientSecret:
+    id:
+    secret:
     scope: openid profile email
     redirectUri:
     stateSecret:
@@ -78,7 +78,7 @@ internalIssuer:
   audience:
   token-expiration: 1h
   scope: openid profile email
-  key:
+  keys:
     keyId:
     privateKey: |
       -----BEGIN PRIVATE KEY-----

@@ -115,10 +115,10 @@ public interface OAuthConfig {
     }
 
     interface FederatedClientConfig {
-        @WithName("client-id")
+        @WithName("id")
         String clientId();
 
-        @WithName("client-secret")
+        @WithName("secret")
         String clientSecret();
 
         @WithName("redirect-uri")
@@ -163,7 +163,7 @@ public interface OAuthConfig {
         @WithName("additional-claims")
         Optional<List<AdditionalClaim>> additionalClaims();
 
-        @WithName("key")
+        @WithName("keys")
         KeyConfig keyConfig();
     }
 
