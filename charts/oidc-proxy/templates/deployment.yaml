@@ -67,25 +67,25 @@ spec:
             - configMapRef:
                 name: {{ .Release.Name }}-env-config
           env:
-            - name: OIDC_CLIENT_ID
+            - name: OIDC_FEDERATED_IDP_CLIENT_ID
               valueFrom:
                 secretKeyRef:
                   name: {{ .Release.Name }}-client-secret
-                  key: OIDC_CLIENT_ID
-            - name: OIDC_CLIENT_SECRET
+                  key: OIDC_FEDERATED_IDP_CLIENT_ID
+            - name: OIDC_FEDERATED_IDP_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: {{ .Release.Name }}-client-secret
-                  key: OIDC_CLIENT_SECRET
-            - name: OIDC_CLIENT_STATE_SECRET
+                  key: OIDC_FEDERATED_IDP_CLIENT_SECRET
+            - name: OIDC_FEDERATED_IDP_CLIENT_STATE_SECRET
               valueFrom:
                 secretKeyRef:
                   name: {{ .Release.Name }}-client-secret
-                  key: OIDC_CLIENT_STATE_SECRET
-            - name: OIDC_INTERNAL_ISSUER_PRIVATE_KEY_LOCATION
-              value: /run/secrets/key/private-key.pem
-            - name: OIDC_INTERNAL_ISSUER_PUBLIC_KEY_LOCATION
-              value: /run/secrets/key/public-key.pem
+                  key: OIDC_FEDERATED_IDP_CLIENT_STATE_SECRET
+            - name: OIDC_INTERNAL_ISSUER_KEYS_PRIVATE_KEY_LOCATION
+              value: /run/secrets/keys/private-key.pem
+            - name: OIDC_INTERNAL_ISSUER_KEYS_PUBLIC_KEY_LOCATION
+              value: /run/secrets/keys/public-key.pem
           resources:
             limits:
               cpu: {{ .Values.resources.limits.cpu }}
@@ -116,7 +116,7 @@ spec:
               mountPath: /deployments/config/application.yaml
               subPath: application.yaml
             - name: issuer-keys
-              mountPath: /run/secrets/key
+              mountPath: /run/secrets/keys
               readOnly: true
       volumes:
         - name: config-file

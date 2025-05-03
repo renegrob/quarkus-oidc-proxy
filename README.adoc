@@ -26,55 +26,7 @@ To configure for a specific provider (like Google, EntraID, etc.), you only need
 
 == Configuration
 
-=== Environment Variables
-
-==== General Settings
-
-STATE_SECRET:: Secret used to secure the state parameter in OIDC flows. Use a strong random value.
-
-==== Cookie Settings
-
-COOKIE_NAME:: Name of the authentication cookie (default: `AUTH_TOKEN`).
-COOKIE_PATH:: Path for the authentication cookie (default: `/`).
-COOKIE_DOMAIN:: Domain for the authentication cookie.
-COOKIE_SECURE:: Whether the cookie is secure (default: `true`).
-COOKIE_HTTP_ONLY:: Whether the cookie is HTTP-only (default: `true`).
-COOKIE_SAME_SITE:: SameSite attribute for the cookie (default: `Lax`).
-COOKIE_MAX_AGE:: Maximum age of the cookie (default: `24h`).
-
-==== Federated IDP Settings
-
-OIDC_FEDERATION_MODE:: Federation mode (valid values: `FEDERATE_FROM_ID_TOKEN`, `FEDERATE_FROM_ACCESS_TOKEN`, `PASS_TROUGH`; default: `FEDERATE_FROM_ID_TOKEN`).
-OIDC_DISCOVERY_ENABLED:: Whether OIDC discovery is enabled (default: true).
-OIDC_AUTH_SERVER_URL:: Base URL of the authorization server.
-OIDC_DISCOVERY_PATH:: Path for OIDC discovery (default: `.well-known/openid-configuration`).
-OIDC_TOKEN_PATH:: Path for token requests.
-OIDC_AUTHORIZATION_PATH:: Path for authorization requests.
-OIDC_JWKS_PATH:: Path for JWKS (JSON Web Key Set).
-OIDC_USERINFO_PATH:: Path for user info requests.
-OIDC_END_SESSION_PATH:: Path for logout requests.
-
-OIDC_ISSUER:: Issuer name for the federated IDP.
-OIDC_AUDIENCE:: Audience for the federated IDP.
-OIDC_CLIENT_ID:: Client ID for the OIDC provider.
-OIDC_CLIENT_SECRET:: Client secret for the OIDC provider.
-OIDC_SCOPE:: Scope for OIDC requests (default: `openid profile email`).
-OIDC_REDIRECT_URL:: Redirect URI for the application.
-
-==== Internal Issuer Settings
-
-OIDC_INTERNAL_ISSUER:: Issuer name for the internal token generator.
-OIDC_PASS_THROUGH_CLAIMS:: List of claims to pass through from the ID token (default: `roles,email,given_name,family_name,name`).
-
-OIDC_INTERNAL_ISSUER_KEY_ID:: Key ID for the internal issuer signing key.
-OIDC_INTERNAL_ISSUER_SIGNATURE_ALGORITHM:: Signature algorithm for the internal issuer (default: `ES256`).
-OIDC_INTERNAL_ISSUER_PRIVATE_KEY:: Private key for signing tokens.
-OIDC_INTERNAL_ISSUER_PUBLIC_KEY:: Public key for verifying tokens.
-
-==== Token Forwarding Settings
-
-OIDC_TOKEN_HEADER_NAME:: Name of the header for forwarding the token (default: `X-Auth-Token`).
-OIDC_TOKEN_FORWARDING_METHOD:: Method for forwarding the token (`HEADER` or `BEARER`, default: `HEADER`).
+include::docs/config.adoc[leveloffset=+2]
 
 == Generate Private and Public Keys
 

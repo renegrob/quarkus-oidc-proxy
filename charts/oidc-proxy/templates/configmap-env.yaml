@@ -11,18 +11,18 @@ data:
   {{ $key }}: {{ $value | quote }}
   {{- end }}
   {{- with .Values.cookie }}
-  {{- if .name }}COOKIE_NAME: {{ .name | quote }}
+  {{- if .name }}OIDC_COOKIE_NAME: {{ .name | quote }}
   {{ end }}
-  {{- if .path }}COOKIE_PATH: {{ .path | quote }}
+  {{- if .path }}OIDC_COOKIE_PATH: {{ .path | quote }}
   {{- end }}
-  COOKIE_DOMAIN: {{ required ".cookie.domain is required." .domain | quote }}
-  {{ if .secure }}COOKIE_SECURE: {{ .secure | quote }}
+  OIDC_COOKIE_DOMAIN: {{ required ".cookie.domain is required." .domain | quote }}
+  {{ if .secure }}OIDC_COOKIE_SECURE: {{ .secure | quote }}
   {{ end }}
-  {{- if .httpOnly }}COOKIE_HTTP_ONLY: {{ .httpOnly | quote }}
+  {{- if .httpOnly }}OIDC_COOKIE_HTTP_ONLY: {{ .httpOnly | quote }}
   {{ end }}
-  {{- if .sameSite }}COOKIE_SAME_SITE: {{ .sameSite | quote }}
+  {{- if .sameSite }}OIDC_COOKIE_SAME_SITE: {{ .sameSite | quote }}
   {{ end }}
-  {{- if .maxAge }}COOKIE_MAX_AGE: {{ .maxAge | quote }}
+  {{- if .maxAge }}OIDC_COOKIE_MAX_AGE: {{ .maxAge | quote }}
   {{ end }}
   {{- end }}
   {{- with .Values.token }}
@@ -34,38 +34,34 @@ data:
   {{- with .Values.idp }}
   {{- if .federationMode }}OIDC_FEDERATION_MODE: {{ .federationMode | quote }}
   {{ end }}
-  {{- if .discoveryEnabled }}OIDC_DISCOVERY_ENABLED: {{ .discoveryEnabled | quote }}
+  {{- if .discoveryEnabled }}OIDC_FEDERATED_IDP_DISCOVERY_ENABLED: {{ .discoveryEnabled | quote }}
   {{ end }}
-  {{- if .authServerUrl }}OIDC_AUTH_SERVER_URL: {{ .authServerUrl | quote }}
+  {{- if .authServerUrl }}OIDC_FEDERATED_IDP_AUTH_SERVER_URL: {{ .authServerUrl | quote }}
   {{ end }}
-  {{- if .tokenPath }}OIDC_TOKEN_PATH: {{ .tokenPath | quote }}
+  {{- if .tokenPath }}OIDC_FEDERATED_IDP_TOKEN_PATH: {{ .tokenPath | quote }}
   {{ end }}
-  {{- if .userinfoUrl }}OIDC_USERINFO_URL: {{ .userinfoUrl | quote }}
+  {{- if .userinfoUrl }}OIDC_FEDERATED_IDP_USERINFO_PATH: {{ .userinfoUrl | quote }}
   {{ end }}
-  {{- if .jwksPath }}OIDC_JWKS_PATH: {{ .jwksPath | quote }}
+  {{- if .jwksPath }}OIDC_FEDERATED_IDP_JWKS_PATH: {{ .jwksPath | quote }}
   {{ end }}
-  {{- if .logoutUrl }}OIDC_LOGOUT_URL: {{ .logoutUrl | quote }}
+  {{- if .logoutUrl }}OIDC_FEDERATED_IDP_END_SESSION_PATH: {{ .logoutUrl | quote }}
   {{ end }}
-  {{- if .issuer }}OIDC_ISSUER: {{ .issuer | quote }}
+  {{- if .issuer }}OIDC_FEDERATED_IDP_ISSUER: {{ .issuer | quote }}
   {{ end }}
-  {{- if .responseType }}OIDC_RESPONSE_TYPE: {{ .responseType | quote }}
-  {{ end }}
-  {{- if .responseMode }}OIDC_RESPONSE_MODE: {{ .responseMode | quote }}
-  {{ end }}
-  {{- if .audience }}OIDC_AUDIENCE: {{ .audience | quote }}
+  {{- if .audience }}OIDC_FEDERATED_IDP_AUDIENCE: {{ .audience | quote }}
   {{- end }}
   {{- with .client }}
-  OIDC_REDIRECT_URL: {{ required ".idp.client.redirectUrl is required." .redirectUrl | quote }}
-  {{ if .scope }}OIDC_SCOPE: {{ .scope | quote }}
+  OIDC_FEDERATED_IDP_CLIENT_REDIRECT_URI: {{ required ".idp.client.redirectUrl is required." .redirectUrl | quote }}
+  {{ if .scope }}OIDC_FEDERATED_IDP_CLIENT_SCOPE: {{ .scope | quote }}
   {{- end }}
   {{- end }}
   {{- end }}
   {{- with .Values.internalIssuer }}
-  OIDC_INTERNAL_ISSUER: {{ required ".Values.internalIssuer.issuer is required." .issuer | quote }}
-  {{ if .audience }}INTERNAL_AUDIENCE: {{ .audience | quote }}
+  OIDC_INTERNAL_ISSUER_ISSUER: {{ required ".Values.internalIssuer.issuer is required." .issuer | quote }}
+  {{ if .audience }}OIDC_INTERNAL_ISSUER_AUDIENCE: {{ .audience | quote }}
   {{ end }}
-  {{- if .expiration }}INTERNAL_EXPIRATION: {{ .expiration | quote }}
+  {{- if .expiration }}OIDC_INTERNAL_ISSUER_EXPIRATION: {{ .expiration | quote }}
   {{ end }}
-  {{- if .scope }}INTERNAL_SCOPE: {{ .scope | quote }}
+  {{- if .scope }}OIDC_INTERNAL_ISSUER_SCOPE: {{ .scope | quote }}
   {{ end }}
   {{- end }}
