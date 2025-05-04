@@ -5,6 +5,7 @@ import io.github.renegrob.oidc.config.PkceMethod;
 import io.github.renegrob.oidc.service.idp.GrantRequestVerificationService;
 import io.github.renegrob.oidc.service.idp.IdpConfiguration;
 import io.github.renegrob.oidc.service.idp.PkceService;
+import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -42,6 +43,7 @@ public class LoginResource {
 
     @GET
     @Produces(MediaType.TEXT_HTML)
+    @RunOnVirtualThread
     public Response login(@QueryParam("rd") String requestUri) {
         var validationData = grantRequestVerificationService.createStateCookie(requestUri);
         var pkceData = pkceService.generatePkceData();

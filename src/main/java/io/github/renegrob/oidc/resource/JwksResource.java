@@ -4,6 +4,7 @@ import io.github.renegrob.oidc.config.FederationMode;
 import io.github.renegrob.oidc.config.OAuthConfig;
 import io.github.renegrob.oidc.service.idp.IdpConfigurationService;
 import io.github.renegrob.oidc.service.internalissuer.InternalKeyInfo;
+import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -32,6 +33,7 @@ public class JwksResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @RunOnVirtualThread
     public String getJwks() throws IOException, InterruptedException {
         if (config.federationMode() == FederationMode.PASS_THROUGH) {
             return java.net.http.HttpClient.newHttpClient()

@@ -6,6 +6,7 @@ import io.github.renegrob.oidc.service.CookieService;
 import io.github.renegrob.oidc.service.internalissuer.InternalIssuerService;
 import io.github.renegrob.oidc.service.idp.*;
 import io.github.renegrob.oidc.service.jwt.JwtClaimsUtil;
+import io.smallrye.common.annotation.RunOnVirtualThread;
 import io.smallrye.jwt.auth.principal.DefaultJWTTokenParser;
 import io.smallrye.jwt.auth.principal.ParseException;
 import jakarta.inject.Inject;
@@ -64,6 +65,7 @@ public class CallbackResource {
     InternalIssuerService internalIssuerService;
 
     @GET
+    @RunOnVirtualThread
     public Response handleCode(@QueryParam("code") String code, @QueryParam("state") String state, @CookieParam(OAUTH_STATE) String cookieState, @CookieParam(OAUTH_CODE_VERIFIER) Cookie codeVerifierCookie) throws ParseException {
         if (code == null) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Missing code").build();
