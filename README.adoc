@@ -12,7 +12,7 @@ This Quarkus application provides OAuth2/OpenID Connect authentication for NGINX
 * */auth/callback*: Processes the response from the Identity Provider (IDP) and generates the authentication cookie.
 * */auth/validate*: Verifies the token from the authentication cookie (used by NGINX via the `auth_request` directive).
 * */auth/logout*: Deletes the authentication cookie to log the user out.
-* *auth/.well-known/jwks.json*: Supplies OIDC discovery metadata for dynamic client registration.
+* */auth/.well-known/jwks.json*: Provides the Json Web Key Set for the tokens passed to the backend.
 
 === NGINX Integration
 
