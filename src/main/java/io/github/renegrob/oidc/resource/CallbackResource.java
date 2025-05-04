@@ -14,6 +14,7 @@ import jakarta.ws.rs.CookieParam;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import org.jose4j.jwt.JwtClaims;
@@ -25,6 +26,7 @@ import java.net.URI;
 import java.util.Set;
 
 import static io.github.renegrob.oidc.constants.CookieNames.OAUTH_STATE;
+import static io.github.renegrob.oidc.constants.CookieNames.OAUTH_CODE_VERIFIER;
 
 
 @Path("/auth/callback")
@@ -62,14 +64,14 @@ public class CallbackResource {
     InternalIssuerService internalIssuerService;
 
     @GET
-    public Response handleCode(@QueryParam("code") String code, @QueryParam("state") String state, @CookieParam(OAUTH_STATE) String cookieState) throws ParseException {
+    public Response handleCode(@QueryParam("code") String code, @QueryParam("state") String state, @CookieParam(OAUTH_STATE) String cookieState, @CookieParam(OAUTH_CODE_VERIFIER) Cookie codeVerifierCookie) throws ParseException {
         if (code == null) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Missing code").build();
         }
         grantRequestVerificationService.verifyState(state, cookieState);
         URI requestUri = GrantRequestVerificationService.extractRequestUri(state);
 
-        JsonObject tokenResponse = tokenService.exchangeCodeForToken(code);
+        JsonObject tokenResponse = tokenService.exchangeCodeForToken(code, codeVerifierCookie);
         String idToken = tokenResponse.getString("id_token");
         String accessToken = tokenResponse.getString("access_token");
 

@@ -54,6 +54,8 @@ data:
   OIDC_FEDERATED_IDP_CLIENT_REDIRECT_URI: {{ required ".idp.client.redirectUrl is required." .redirectUrl | quote }}
   {{ if .scope }}OIDC_FEDERATED_IDP_CLIENT_SCOPE: {{ .scope | quote }}
   {{- end }}
+  {{ if .pckeMethod }}OIDC_FEDERATED_IDP_CLIENT_PKCE_METHOD: {{ .pckeMethod | quote }}
+  {{- end }}
   {{- end }}
   {{- end }}
   {{- with .Values.internalIssuer }}

@@ -3,6 +3,11 @@ package io.github.renegrob.oidc.util;
 import java.util.Base64;
 
 public final class Base64Util {
+
+    public static String toUrlBase64(byte[] data) {
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(data);
+    }
+
     public static String toBase64(byte[] data, boolean withoutPadding) {
         if (withoutPadding) {
             return Base64.getEncoder().withoutPadding().encodeToString(data);
