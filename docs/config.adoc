@@ -82,7 +82,7 @@
 | `oidc.internal-issuer.keys.private-key.location` | `OIDC_INTERNAL_ISSUER_KEYS_PRIVATE_KEY_LOCATION` | The location of the private key for signing internal tokens. | `Optional<String>` | *(none)*
 | `oidc.internal-issuer.keys.public-key` | `OIDC_INTERNAL_ISSUER_KEYS_PUBLIC_KEY` | The public key for verifying internal tokens. | `Optional<String>` | *(none)*
 | `oidc.internal-issuer.keys.public-key.location` | `OIDC_INTERNAL_ISSUER_KEYS_PUBLIC_KEY_LOCATION` | The location of the public key for verifying internal tokens. | `Optional<String>` | *(none)*
-|===s
+|===
 
 == Additional Claim Config
 
