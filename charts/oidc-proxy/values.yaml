@@ -53,6 +53,11 @@ cookie:
   httpOnly: true
   sameSite: Lax
   maxAge: 24h
+  encryption:
+    enabled: true
+    algorithm:
+    key: # Base64 encoded 32-byte key
+    # Generate a secure key using: openssl rand -base64 32
 
 token:
   headerName: X-Auth-Token

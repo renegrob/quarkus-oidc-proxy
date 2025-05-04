@@ -40,6 +40,11 @@ spec:
                 secretKeyRef:
                   name: {{ .Release.Name }}-client-secret
                   key: OIDC_CLIENT_SECRET
+            - name: OIDC_COOKIE_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-client-secret
+                  key: OIDC_COOKIE_ENCRYPTION_KEY
             - name: OIDC_CLIENT_STATE_SECRET
               valueFrom:
                 secretKeyRef:
@@ -82,6 +87,11 @@ spec:
                 secretKeyRef:
                   name: {{ .Release.Name }}-client-secret
                   key: OIDC_FEDERATED_IDP_CLIENT_STATE_SECRET
+            - name: OIDC_COOKIE_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-client-secret
+                  key: OIDC_COOKIE_ENCRYPTION_KEY
             - name: OIDC_INTERNAL_ISSUER_KEYS_PRIVATE_KEY_LOCATION
               value: /run/secrets/keys/private-key.pem
             - name: OIDC_INTERNAL_ISSUER_KEYS_PUBLIC_KEY_LOCATION

@@ -5,6 +5,7 @@ import io.github.renegrob.oidc.config.OAuthConfig;
 import io.github.renegrob.oidc.service.CookieService;
 import io.github.renegrob.oidc.service.internalissuer.InternalJwtValidatorService;
 import io.github.renegrob.oidc.service.idp.ExternalJwtValidatorService;
+import io.quarkus.runtime.util.StringUtil;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -38,11 +39,12 @@ public class ValidateTokenResource {
 
     @GET
     @RunOnVirtualThread
-    public RestResponse<String> validate(@RestCookie("AUTH_TOKEN") String token) {
-        if (token == null || token.isEmpty()) {
+    public RestResponse<String> validate(@RestCookie("AUTH_TOKEN") String encryptedToken) {
+        if (StringUtil.isNullOrEmpty(encryptedToken)) {
             LOG.debug("No auth token found in cookie");
             return RestResponse.status(Response.Status.UNAUTHORIZED);
         }
+        String token = cookieService.decryptAuthCookie(encryptedToken);
 
         boolean tokenIsValid = config.federationMode() == FederationMode.PASS_THROUGH
                 ? externalJwtValidatorService.validateToken(token)
