@@ -58,6 +58,13 @@ public interface OAuthConfig {
         @WithName("max-age")
         @WithDefault("24h")
         Duration maxAge();
+
+        @WithName("encryption.algorithm")
+        @WithDefault("AES/GCM/NoPadding")
+        String encryptionAlgorithm();
+
+        @WithName("encryption.key")
+        String encryptionKey();
     }
 
     interface tokenConfig {

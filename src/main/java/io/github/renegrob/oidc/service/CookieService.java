@@ -11,10 +11,12 @@ import java.time.Duration;
 public class CookieService {
 
     private final OAuthConfig.CookieConfig config;
+    private final EncryptionService encryptionService;
 
     @Inject
-    CookieService(OAuthConfig config) {
+    CookieService(OAuthConfig config, EncryptionService encryptionService) {
         this.config = config.cookie();
+        this.encryptionService = encryptionService;
     }
 
     public NewCookie createCookie(String name, String value) {
@@ -46,7 +48,20 @@ public class CookieService {
     }
 
     public NewCookie createAuthCookie(String token) {
-        return createCookie(config.name(), token, config.maxAge());
+        try {
+            String encryptedToken = encryptionService.encrypt(token);
+            return createCookie(config.name(), encryptedToken, config.maxAge());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to encrypt token", e);
+        }
+    }
+
+    public String decryptAuthCookie(String encryptedToken) {
+        try {
+            return encryptionService.decrypt(encryptedToken);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to decrypt token", e);
+        }
     }
 
     public NewCookie createLogoutCookie() {

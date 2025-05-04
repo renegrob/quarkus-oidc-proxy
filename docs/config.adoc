@@ -20,6 +20,7 @@
 | `oidc.cookie.http-only` | `OIDC_COOKIE_HTTP_ONLY` | Whether the cookie is HTTP-only. | `boolean` | `true`
 | `oidc.cookie.same-site` | `OIDC_COOKIE_SAME_SITE` | The SameSite attribute for the cookie. | `NewCookie.SameSite` | `Lax`
 | `oidc.cookie.max-age` | `OIDC_COOKIE_MAX_AGE` | The maximum age of the cookie. | `Duration` | `24h`
+| `oidc.cookie.encryption.key` | `OIDC_COOKIE_ENCRYPTION_KEY` | The key used to encrypt the cookie. Can be generated with `openssl rand -base64 32` | `String` | *(required)*
 |===
 
 == Token Propagation Config
