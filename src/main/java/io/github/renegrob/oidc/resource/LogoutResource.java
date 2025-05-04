@@ -3,6 +3,7 @@ package io.github.renegrob.oidc.resource;
 import io.github.renegrob.oidc.config.OAuthConfig;
 import io.github.renegrob.oidc.service.*;
 import io.github.renegrob.oidc.service.idp.DiscoveryService;
+import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.NewCookie;
@@ -32,6 +33,7 @@ public class LogoutResource {
 
 
     @GET
+    @RunOnVirtualThread
     public RestResponse<Void> logout() {
         LOG.debug("Processing logout request");
         NewCookie logoutCookie = cookieService.createLogoutCookie();

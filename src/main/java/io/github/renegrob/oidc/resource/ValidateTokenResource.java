@@ -5,6 +5,7 @@ import io.github.renegrob.oidc.config.OAuthConfig;
 import io.github.renegrob.oidc.service.CookieService;
 import io.github.renegrob.oidc.service.internalissuer.InternalJwtValidatorService;
 import io.github.renegrob.oidc.service.idp.ExternalJwtValidatorService;
+import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -36,6 +37,7 @@ public class ValidateTokenResource {
 
 
     @GET
+    @RunOnVirtualThread
     public RestResponse<String> validate(@RestCookie("AUTH_TOKEN") String token) {
         if (token == null || token.isEmpty()) {
             LOG.debug("No auth token found in cookie");
