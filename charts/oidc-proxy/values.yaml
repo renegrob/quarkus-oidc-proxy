@@ -41,6 +41,9 @@ logLevel:
   oidc: DEBUG
 
 env:
+  # Override with your own values
+  QUARKUS_HTTP_CORS_ENABLED: "false"
+  QUARKUS_HTTP_CORS_ORIGIN: null
 
 cookie:
   name: AUTH_TOKEN

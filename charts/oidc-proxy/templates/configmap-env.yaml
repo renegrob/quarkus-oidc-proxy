@@ -7,10 +7,10 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 data:
-  {{ range $key, $value := .Values.env }}
+  {{- range $key, $value := .Values.env }}
   {{ $key }}: {{ $value | quote }}
   {{- end }}
-  {{- with .Values.cookie }}
+  {{ with .Values.cookie }}
   {{- if .name }}OIDC_COOKIE_NAME: {{ .name | quote }}
   {{ end }}
   {{- if .path }}OIDC_COOKIE_PATH: {{ .path | quote }}
