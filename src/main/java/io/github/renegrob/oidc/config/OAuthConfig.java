@@ -129,6 +129,10 @@ public interface OAuthConfig {
 
         @WithName("state-secret")
         String stateSecret();
+
+        @WithName("pkce-method")
+        @WithDefault("S256")
+        Optional<PkceMethod> pkceMethod();
     }
 
     interface InternalIssuerConfig {

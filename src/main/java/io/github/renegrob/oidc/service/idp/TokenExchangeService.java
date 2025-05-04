@@ -7,6 +7,7 @@ import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.core.Cookie;
 
 import java.io.StringReader;
 import java.net.URLEncoder;
@@ -27,13 +28,20 @@ public class TokenExchangeService {
         this.idpConfigurationService = idpConfigurationService;
     }
 
-    public JsonObject exchangeCodeForToken(String code) {
+    public JsonObject exchangeCodeForToken(String code, Cookie codeVerifierCookie) {
         try {
-            String form = "grant_type=authorization_code" +
-                    "&client_id=" + URLEncoder.encode(clientConfig.clientId(), StandardCharsets.UTF_8) +
-                    "&client_secret=" + URLEncoder.encode(clientConfig.clientSecret(), StandardCharsets.UTF_8) +
-                    "&code=" + URLEncoder.encode(code, StandardCharsets.UTF_8) +
-                    "&redirect_uri=" + URLEncoder.encode(clientConfig.redirectUri().toString(), StandardCharsets.UTF_8);
+            StringBuilder formBuilder = new StringBuilder()
+                    .append("grant_type=authorization_code")
+                    .append("&client_id=").append(URLEncoder.encode(clientConfig.clientId(), StandardCharsets.UTF_8))
+                    .append("&client_secret=").append(URLEncoder.encode(clientConfig.clientSecret(), StandardCharsets.UTF_8))
+                    .append("&code=").append(URLEncoder.encode(code, StandardCharsets.UTF_8))
+                    .append("&redirect_uri=").append(URLEncoder.encode(clientConfig.redirectUri().toString(), StandardCharsets.UTF_8));
+
+            if (clientConfig.pkceMethod().isPresent() && codeVerifierCookie != null) {
+                formBuilder.append("&code_verifier=").append(URLEncoder.encode(codeVerifierCookie.getValue(), StandardCharsets.UTF_8));
+            }
+
+            String form = formBuilder.toString();
 
             HttpRequest req = HttpRequest.newBuilder()
                     .uri(idpConfigurationService.tokenEndpoint())

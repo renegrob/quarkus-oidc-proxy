@@ -58,7 +58,8 @@
 | `oidc.federated-idp.client.secret` | `OIDC_FEDERATED_IDP_CLIENT_SECRET` | The client secret for the OIDC provider. | `String` | *(required)*
 | `oidc.federated-idp.client.redirect-uri` | `OIDC_FEDERATED_IDP_CLIENT_REDIRECT_URI` | The redirect URI for the OIDC provider. | `URI` | *(required)*
 | `oidc.federated-idp.client.scope` | `OIDC_FEDERATED_IDP_CLIENT_SCOPE` | The scope for the OIDC provider. | `Optional<String>` | *(none)*
-| `oidc.federated-idp.client.state-secret` | `OIDC_FEDERATED_IDP_CLIENT_STATE_SECRET` | Secret used to secure the state parameter in OIDC flows. Use a strong random value.. | `String` | *(required)*
+| `oidc.federated-idp.client.state-secret` | `OIDC_FEDERATED_IDP_CLIENT_STATE_SECRET` | Secret used to secure the state parameter in OIDC flows. Use a strong random value. | `String` | *(required)*
+| `oidc.federated-idp.client.pkce-method` | `OIDC_FEDERATED_IDP_CLIENT_PKCE_METHOD` | The code challenge method for Proof Key for Code Exchange (PKCE)  | `Optional<PkceMethod>` | *`S256`*
 |===
 
 == Internal-Issuer Config
