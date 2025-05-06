@@ -13,3 +13,33 @@ quarkus:
     category:
       "io.github.renegrob.oidc":
         level: ${OIDC_LOG_LEVEL:DEBUG}
+  smallrye-openapi:
+    path: /openapi
+    info:
+      title: OIDC Proxy API
+      version: 1.0.0
+      description: |
+        This API provides endpoints for OIDC (OpenID Connect) authentication and token validation.
+        It supports both federated authentication through external identity providers and internal token issuance.
+      contact:
+        name: René Grob
+        url: https://github.com/renegrob/oidc-proxy
+    servers:
+      - url: /
+        description: Default server
+    security-scheme:
+      cookieAuth:
+        type: apiKey
+        in: cookie
+        name: AUTH_TOKEN
+        description: Authentication token stored in cookie
+  swagger-ui:
+    path: /swagger-ui
+    always-include: true
+    operations-sorter: alpha
+    tags-sorter: alpha
+    doc-expansion: none
+    filter: true
+    syntax-highlight:
+      activated: true
+      theme: agate
