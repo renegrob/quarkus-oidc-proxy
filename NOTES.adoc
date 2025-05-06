@@ -5,3 +5,23 @@
 Use http-https-echo-chart to test the OIDC flow. The chart is available at:
 
 https://github.com/germanattanasio/http-https-echo-chart?tab=readme-ov-file
+
+
+Areas for Potential Improvement:
+
+    Consider adding API documentation (e.g., OpenAPI/Swagger)
+    Add more comprehensive test coverage (I see test dependencies but would need to check actual test files)
+    Consider adding rate limiting for security
+    Add more detailed logging for security events
+    Consider adding circuit breakers for external service calls
+
+ Deployment:
+    Good Kubernetes/Helm support with deployment configurations
+    Docker container support
+    Proper configuration for different environments
+
+Documentation:
+
+Good README and documentation files
+Azure Entra ID setup documentation
+Helm deployment instructions

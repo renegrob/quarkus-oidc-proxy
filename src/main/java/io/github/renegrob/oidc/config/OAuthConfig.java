@@ -31,6 +31,13 @@ public interface OAuthConfig {
     @WithName("internal-issuer")
     InternalIssuerConfig internalIssuer();
 
+    @WithName("role-claim-name")
+    @WithDefault("roles")
+    String roleClaimName();
+
+    @WithName("policies")
+    Optional<List<Policy>> policies();
+
     interface CookieConfig {
         @WithName("name")
         @WithDefault("AUTH_TOKEN")
@@ -248,5 +255,13 @@ public interface OAuthConfig {
 
         @WithName("public-key.location")
         Optional<String> publicKeyLocation();
+    }
+
+    interface Policy {
+        @WithName("name")
+        String name();
+
+        @WithName("role-sets")
+        List<Set<String>> roleSets();
     }
 }

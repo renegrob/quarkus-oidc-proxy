@@ -4,6 +4,7 @@ import io.quarkus.logging.Log;
 import io.smallrye.jwt.auth.principal.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.consumer.JwtContext;
 
 @ApplicationScoped
@@ -19,16 +20,15 @@ public class ExternalJwtValidatorService {
         this.jwtAuthContextInfo = idpConfigurationService.jwtAuthContextInfo();
     }
 
-    public boolean validateToken(String token) {
+    public JwtClaims validateToken(String token) {
         if (token == null || token.isEmpty()) {
-            return false;
+            return null;
         }
         try {
-            parse(token);
-            return true;
+            return parse(token).getJwtClaims();
         } catch (ParseException e) {
             Log.debug("Failed to parse JWT: " + e.getMessage(), e);
-            return false;
+            return null;
         }
     }
 

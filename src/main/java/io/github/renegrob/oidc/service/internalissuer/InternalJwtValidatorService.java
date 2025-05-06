@@ -8,6 +8,7 @@ import io.smallrye.jwt.auth.principal.JWTAuthContextInfo;
 import io.smallrye.jwt.auth.principal.ParseException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.consumer.JwtContext;
 
 import java.security.GeneralSecurityException;
@@ -33,16 +34,15 @@ public class InternalJwtValidatorService {
         this.jwtAuthContextInfo.setSignatureAlgorithm(Set.of(keyConfig.signatureAlgorithm()));
     }
 
-    public boolean validateToken(String token) {
+    public JwtClaims validateToken(String token) {
         if (token == null || token.isEmpty()) {
-            return false;
+            return null;
         }
         try {
-            JwtContext jwt = jwtParser.parse(token, jwtAuthContextInfo);
-            return true;
+            return jwtParser.parse(token, jwtAuthContextInfo).getJwtClaims();
         } catch (ParseException e) {
             Log.debug("Failed to parse JWT: " + e.getMessage(), e);
-            return false;
+            return null;
         }
     }
 }
