@@ -4,12 +4,14 @@ import io.github.renegrob.oidc.config.FederationMode;
 import io.github.renegrob.oidc.config.OAuthConfig;
 import io.github.renegrob.oidc.service.CookieService;
 import io.github.renegrob.oidc.service.PolicyService;
-import io.github.renegrob.oidc.service.internalissuer.InternalJwtValidatorService;
 import io.github.renegrob.oidc.service.idp.ExternalJwtValidatorService;
+import io.github.renegrob.oidc.service.internalissuer.InternalJwtValidatorService;
 import io.quarkus.runtime.util.StringUtil;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import org.jboss.resteasy.reactive.RestCookie;
@@ -19,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
-import java.util.Set;
 
 import static io.github.renegrob.oidc.config.TokenForwardingMethod.BEARER;
 
@@ -46,9 +47,11 @@ public class ValidateTokenResource {
 
     @GET
     @RunOnVirtualThread
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     public RestResponse<String> validate(
             @RestCookie("AUTH_TOKEN") String encryptedToken,
-            @QueryParam("policy") Optional<String> policyName) {
+            @QueryParam("policy") Optional<String> policyName,
+            @QueryParam("required_roles") Optional<String> requiredRoles) {
         if (StringUtil.isNullOrEmpty(encryptedToken)) {
             LOG.debug("No auth token found in cookie");
             return RestResponse.status(Response.Status.UNAUTHORIZED);
@@ -65,6 +68,7 @@ public class ValidateTokenResource {
         }
 
         policyName.ifPresent(policy -> policyService.checkPolicy(claims, policy));
+        requiredRoles.ifPresent(roles -> policyService.checkRequiredRoles(claims, roles.split(",")));
 
         LOG.debug("Token is valid");
         String headerName = config.token().forwardingMethod() == BEARER ? HttpHeaders.AUTHORIZATION : config.token().headerName();

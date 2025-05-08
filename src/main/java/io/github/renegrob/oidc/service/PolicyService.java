@@ -52,6 +52,16 @@ public class PolicyService {
         }
     }
 
+    public void checkRequiredRoles(JwtClaims claims, String[] requiredRoles) {
+        Collection<String> userRoles = getRoleClaim(claims);
+        for (String role : requiredRoles) {
+            if (!userRoles.contains(role)) {
+                LOG.debug("User does not have required role: {}", role);
+                throw new NotAuthorizedException("User is not authorized.");
+            }
+        }
+    }
+
     private Collection<String> getRoleClaim(JwtClaims claims) {
         Object claimValue = claims.getClaimValue(roleClaim);
         switch (claimValue) {

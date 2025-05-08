@@ -14,7 +14,12 @@ import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.jwk.JsonWebKeySet;
 
 import java.io.IOException;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse.BodyHandlers;
 import java.security.PublicKey;
+
+import static java.net.http.HttpClient.newHttpClient;
+import static java.net.http.HttpRequest.newBuilder;
 
 @Path("auth/.well-known/jwks.json")
 @SuppressWarnings("unused")
@@ -36,10 +41,10 @@ public class JwksResource {
     @RunOnVirtualThread
     public String getJwks() throws IOException, InterruptedException {
         if (config.federationMode() == FederationMode.PASS_THROUGH) {
-            return java.net.http.HttpClient.newHttpClient()
-                    .send(java.net.http.HttpRequest.newBuilder(idpConfigurationService.jwksUri()).GET().build(),
-                          java.net.http.HttpResponse.BodyHandlers.ofString())
-                    .body();
+            try (var client = newHttpClient()) {
+                HttpRequest request = newBuilder(idpConfigurationService.jwksUri()).GET().build();
+                return client.send(request, BodyHandlers.ofString()).body();
+            }
         }
 
         try {

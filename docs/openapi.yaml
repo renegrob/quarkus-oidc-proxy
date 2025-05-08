@@ -1,0 +1,150 @@
+openapi: 3.0.3
+info:
+  title: OIDC Proxy API
+  description: |
+    This API provides endpoints for OIDC (OpenID Connect) authentication and token validation.
+    It supports both federated authentication through external identity providers and internal token issuance.
+  version: 1.0.0
+  contact:
+    name: Renegrob
+    url: https://github.com/renegrob/oidc-proxy
+
+servers:
+  - url: /
+    description: Default server
+
+paths:
+  /auth/validate:
+    get:
+      summary: Validate authentication token
+      description: |
+        Validates the authentication token from the cookie and returns a success response with the token
+        forwarded in the specified header format (Bearer or custom header).
+      parameters:
+        - name: AUTH_TOKEN
+          in: cookie
+          required: true
+          schema:
+            type: string
+          description: Encrypted authentication token stored in cookie
+        - name: policy
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Optional policy name to check against user roles
+        - name: requiredRoles
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Optional comma separated list of required user roles
+      responses:
+        '200':
+          description: Token is valid
+          headers:
+            Authorization:
+              schema:
+                type: string
+              description: Bearer token or custom header with the validated token
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Token is valid"
+        '401':
+          description: Unauthorized - Invalid or expired token
+        '500':
+          description: Internal server error
+
+  /auth/callback:
+    get:
+      summary: OAuth callback endpoint
+      description: |
+        Handles the OAuth callback from the identity provider, processes the authorization code,
+        and sets up the authentication cookie.
+      parameters:
+        - name: code
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Authorization code from the identity provider
+        - name: state
+          in: query
+          required: true
+          schema:
+            type: string
+          description: State parameter to prevent CSRF attacks
+        - name: OAUTH_STATE
+          in: cookie
+          required: true
+          schema:
+            type: string
+          description: State cookie to validate against the state parameter
+        - name: OAUTH_CODE_VERIFIER
+          in: cookie
+          required: true
+          schema:
+            type: string
+          description: PKCE code verifier for the authorization code
+      responses:
+        '302':
+          description: Redirect to the configured redirect URI
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Authentication cookie containing the encrypted token
+        '400':
+          description: Bad request - Invalid parameters
+        '401':
+          description: Unauthorized - Invalid state or code
+        '500':
+          description: Internal server error
+
+  /auth/.well-known/jwks.json:
+    get:
+      summary: JSON Web Key Set endpoint
+      description: |
+        Provides the JSON Web Key Set (JWKS) for token validation.
+        In federated mode, this endpoint proxies to the external identity provider's JWKS endpoint.
+        In internal issuer mode, it provides the internal JWKS.
+      responses:
+        '200':
+          description: JSON Web Key Set
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  keys:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        kty:
+                          type: string
+                        kid:
+                          type: string
+                        use:
+                          type: string
+                        alg:
+                          type: string
+                        n:
+                          type: string
+                        e:
+                          type: string
+        '500':
+          description: Internal server error
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: AUTH_TOKEN
+      description: Authentication token stored in cookie
+
+security:
+  - cookieAuth: [] 
